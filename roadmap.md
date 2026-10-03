@@ -11,4 +11,4 @@
 - [ ] Accounts + saved data in Lovable Cloud (tracker currently saved in this browser)
 - [ ] Interview page: separate video toggles (candidate camera / AI interviewer video), cycle ElevenLabs voices with gender-matched names, lip-synced AI persona video only when toggled
 - [x] Jobs-first structure: add a job, start interviews and see stats inside it
-- [ ] Required text boxes: no minimum, red highlight + 'You must fill in this field' when empty on proceed
+- [x] Required text boxes: no minimum, red highlight + 'You must fill in this field' when empty on proceed
