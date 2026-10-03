@@ -114,3 +114,9 @@
     color-mix(in oklab, var(--primary) 6%, transparent) 11px
   );
 }
+
+@keyframes talk {
+  0%, 100% { transform: scale(1) translateY(0); }
+  30% { transform: scale(1.02) translateY(-1px); }
+  60% { transform: scale(0.99) translateY(1px); }
+}
