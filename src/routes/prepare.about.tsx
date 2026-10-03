@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,11 @@ function AboutPage() {
   const [d, setD] = useState<Draft | null>(null);
   const [step, setStep] = useState(-1);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [reading, setReading] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [chars, setChars] = useState(0);
+  const [extractError, setExtractError] = useState<string | null>(null);
 
   useEffect(() => {
     const dr = loadDraft();
