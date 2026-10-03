@@ -70,7 +70,7 @@ function Home() {
 
       <section id="interviews" className="scroll-mt-24">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
-          <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
+          <h2 className="font-display text-3xl font-medium">Your interviews</h2>
         {jobs && jobs.length === 0 && (
           <p className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
             No interviews yet. Complete your first mock interview and it will appear here automatically.
