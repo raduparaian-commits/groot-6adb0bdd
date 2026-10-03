@@ -53,8 +53,8 @@ function LivePage() {
   const endingRef = useRef(false);
   const startedRef = useRef(false);
 
-  const persona = PERSONAS[personaIdx];
-  const personaImg = PERSONA_IMAGES[personaIdx];
+  const persona = PERSONAS[personaIdx]!;
+  const personaImg = PERSONA_IMAGES[personaIdx]!;
 
   const addTurn = (t: Turn) => { turnsRef.current = [...turnsRef.current, t]; setTurns(turnsRef.current); };
 
@@ -88,7 +88,7 @@ function LivePage() {
     setPhase("connecting");
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      const p = PERSONAS[personaRef.current];
+      const p = PERSONAS[personaRef.current]!;
       const s = await startVoice({ data: {
         jd: dr.jd, duration: dr.duration, round: roundName(dr), interviewers: dr.interviewers, additional: dr.additional, cv: dr.cv,
         title: dr.analysis!.title, company: dr.analysis!.company, interviewer: dr.prep!.interviewer, personaName: p.name, plan: dr.plan!,
