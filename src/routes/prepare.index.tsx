@@ -127,7 +127,8 @@ function JdPage() {
       saveDraft({ ...d, ...r, transcript: undefined, results: undefined });
       nav({ to: "/prepare/room" });
     } catch (e: any) {
-      setError(e.message);
+      const raw = e?.message ?? "";
+      setError(/^\s*[[{]/.test(raw) ? "Something went wrong building your interview — please try again." : raw || "Something went wrong. Please try again.");
       setStep(-1);
     } finally {
       clearInterval(t);

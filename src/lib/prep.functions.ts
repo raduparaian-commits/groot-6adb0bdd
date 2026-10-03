@@ -6,7 +6,7 @@ import type { JdAnalysis, PlanItem, PrepInfo, Results, Turn } from "./prep";
 const VOLUME: Record<number, string> = { 10: "2-4", 15: "3-5", 20: "4-6", 30: "6-8", 45: "8-11", 60: "10-14" };
 
 const Config = z.object({
-  jd: z.string().min(50).max(30000),
+  jd: z.string().min(1).max(30000),
   duration: z.number().int().min(5).max(90),
   round: z.string().max(100),
   interviewers: z.array(z.string().max(60)).max(10),
