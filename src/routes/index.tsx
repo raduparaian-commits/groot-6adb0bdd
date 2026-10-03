@@ -33,7 +33,7 @@ function Home() {
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <section className="relative flex min-h-[520px] flex-1 flex-col items-center justify-center overflow-hidden bg-surface px-4 py-20 text-center text-surface-foreground sm:py-28">
+      <section className="relative flex min-h-[calc(100svh-4rem)] flex-1 flex-col items-center justify-center overflow-hidden bg-surface px-4 py-20 text-center text-surface-foreground sm:py-28">
         {/* Neural pulse background — stretches edge-to-edge across the window */}
         <div aria-hidden className="absolute inset-0 pointer-events-none">
           <div
