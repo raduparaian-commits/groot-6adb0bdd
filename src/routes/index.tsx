@@ -18,20 +18,10 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const FILTERS = ["All", "Preparing", "Scheduled", "Waiting", "Completed"] as const;
-
 function statusOf(j: Job) { return j.rounds.at(-1)?.realStatus ?? "Preparing"; }
-function matches(j: Job, f: (typeof FILTERS)[number]) {
-  const s = statusOf(j);
-  if (f === "All") return true;
-  if (f === "Waiting") return s === "Waiting for outcome";
-  if (f === "Completed") return ["Passed", "Rejected", "Offer"].includes(s);
-  return s === f;
-}
 
 function Home() {
   const [jobs, setJobs] = useState<Job[] | null>(null);
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
   useEffect(() => {
     const refresh = () => setJobs(loadJobs());
     refresh();
@@ -52,21 +42,14 @@ function Home() {
       </section>
 
       <section id="interviews" className="mt-14 scroll-mt-24">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-3 py-1 text-sm ${filter === f ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>{f}</button>
-            ))}
-          </div>
-        </div>
+        <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
         {jobs && jobs.length === 0 && (
           <p className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
             No interviews yet. Complete your first mock interview and it will appear here automatically.
           </p>
         )}
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          {jobs?.filter((j) => matches(j, filter)).map((j) => {
+          {jobs?.map((j) => {
             const round = j.rounds.at(-1);
             const atts = round?.attempts ?? [];
             const latest = atts.at(-1);
