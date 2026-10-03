@@ -2,10 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Mic, MicOff, PhoneOff, ScrollText, Send, Volume2, VolumeX } from "lucide-react";
+import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { loadDraft, recordAttempt, roundName, saveDraft, type Draft, type Turn } from "@/lib/prep";
-import { nextTurn, scoreInterview } from "@/lib/prep.functions";
+import { scoreInterview } from "@/lib/prep.functions";
+import { startVoiceInterview } from "@/lib/voice.functions";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -16,122 +18,113 @@ export const Route = createFileRoute("/live")({
       { property: "og:description", content: "A live, adaptive AI interview that listens and follows up like a real interviewer." },
     ],
   }),
-  component: LivePage,
+  component: () => <ConversationProvider><LivePage /></ConversationProvider>,
 });
 
-type Phase = "thinking" | "speaking" | "listening" | "scoring";
+type Phase = "connecting" | "thinking" | "speaking" | "listening" | "error" | "ended" | "scoring";
 
 function LivePage() {
   const nav = useNavigate();
-  const ask = useServerFn(nextTurn);
+  const startVoice = useServerFn(startVoiceInterview);
   const score = useServerFn(scoreInterview);
   const [d, setD] = useState<Draft | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [phase, setPhase] = useState<Phase>("thinking");
+  const turnsRef = useRef<Turn[]>([]);
+  const [phase, setPhase] = useState<Phase>("connecting");
   const [answer, setAnswer] = useState("");
   const [muted, setMuted] = useState(false);
-  const [mic, setMic] = useState(false);
+  const [micOff, setMicOff] = useState(false);
   const [showT, setShowT] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [closing, setClosing] = useState(false);
-  const recRef = useRef<any>(null);
   const startRef = useRef(Date.now());
-  const mutedRef = useRef(false);
-  mutedRef.current = muted;
+  const endingRef = useRef(false);
+  const startedRef = useRef(false);
+
+  const addTurn = (t: Turn) => { turnsRef.current = [...turnsRef.current, t]; setTurns(turnsRef.current); };
+
+  const convo = useConversation({
+    micMuted: micOff,
+    volume: muted ? 0 : 1,
+    onMessage: (m) => {
+      const text = m.message?.trim();
+      if (!text) return;
+      if (m.role === "agent" || m.source === "ai") addTurn({ speaker: "interviewer", text });
+      else { addTurn({ speaker: "candidate", text }); setPhase((p) => (p === "listening" ? "thinking" : p)); }
+    },
+    onModeChange: ({ mode }) => { if (!endingRef.current) setPhase(mode === "speaking" ? "speaking" : "listening"); },
+    onConnect: () => { startRef.current = Date.now(); setPhase("listening"); },
+    onDisconnect: () => { if (!endingRef.current) setPhase("ended"); },
+    onError: (msg) => { setError(typeof msg === "string" ? msg : "Connection error"); setPhase("error"); },
+  });
 
   useEffect(() => {
     const dr = loadDraft();
     if (!dr.plan || !dr.prep) { nav({ to: "/prepare" }); return; }
     setD(dr);
-    startRef.current = Date.now();
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000);
-    return () => { clearInterval(t); window.speechSynthesis?.cancel(); recRef.current?.stop(); };
+    return () => { clearInterval(t); try { convo.endSession(); } catch {} };
   }, []);
 
-  useEffect(() => { if (d && turns.length === 0) step([]); }, [d]);
+  useEffect(() => { if (d && !startedRef.current) { startedRef.current = true; connect(d); } }, [d]);
 
-  function payload(dr: Draft, t: Turn[]) {
-    return {
-      jd: dr.jd, duration: dr.duration, round: roundName(dr), interviewers: dr.interviewers, additional: dr.additional, cv: dr.cv,
-      title: dr.analysis!.title, company: dr.analysis!.company, interviewer: dr.prep!.interviewer, plan: dr.plan!,
-      transcript: t, elapsedSec: Math.floor((Date.now() - startRef.current) / 1000),
-    };
-  }
-
-  function say(text: string, after: () => void) {
-    const s = window.speechSynthesis;
-    if (mutedRef.current || !s) { after(); return; }
-    s.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.02;
-    u.onend = after;
-    u.onerror = after;
-    s.speak(u);
-  }
-
-  async function step(t: Turn[]) {
-    if (!d) return;
-    setPhase("thinking");
+  async function connect(dr: Draft) {
+    setError(null);
+    setPhase("connecting");
     try {
-      const r = await ask({ data: payload(d, t) });
-      const next = [...t, { speaker: "interviewer" as const, text: r.say, followUp: r.followUp }];
-      setTurns(next);
-      setPhase("speaking");
-      setClosing(r.done);
-      say(r.say, () => setPhase(r.done ? "speaking" : "listening"));
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const s = await startVoice({ data: {
+        jd: dr.jd, duration: dr.duration, round: roundName(dr), interviewers: dr.interviewers, additional: dr.additional, cv: dr.cv,
+        title: dr.analysis!.title, company: dr.analysis!.company, interviewer: dr.prep!.interviewer, plan: dr.plan!,
+      } });
+      convo.startSession({
+        conversationToken: s.token,
+        connectionType: "webrtc",
+        overrides: { agent: { prompt: { prompt: s.prompt }, firstMessage: s.firstMessage } },
+      });
     } catch (e: any) {
-      setError(e.message);
-      setPhase("listening");
+      setError(e?.name === "NotAllowedError" ? "Microphone access is needed for the voice interview." : e.message);
+      setPhase("error");
     }
   }
 
-  function toggleMic() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return setError("Voice answers aren't supported in this browser — type instead.");
-    if (mic) { recRef.current?.stop(); return; }
-    const rec = new SR();
-    rec.continuous = true;
-    rec.interimResults = false;
-    const base = answer;
-    let said = "";
-    rec.onresult = (e: any) => {
-      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) said += e.results[i][0].transcript + " ";
-      setAnswer((base + " " + said).trim());
-    };
-    rec.onend = () => setMic(false);
-    recRef.current = rec;
-    rec.start();
-    setMic(true);
-  }
+  // Auto-wrap if the interview runs well past the planned time
+  useEffect(() => { if (d && elapsed > d.duration * 60 + 120 && phase !== "scoring" && phase !== "ended") { endingRef.current = true; try { convo.endSession(); } catch {} setPhase("ended"); } }, [elapsed]);
 
   function send() {
-    recRef.current?.stop();
     const text = answer.trim();
     if (!text) return;
-    const t = [...turns, { speaker: "candidate" as const, text }];
-    setTurns(t);
+    convo.sendUserMessage(text);
+    addTurn({ speaker: "candidate", text });
     setAnswer("");
-    step(t);
+    setPhase("thinking");
   }
 
   async function end() {
     if (!d) return;
-    recRef.current?.stop();
-    window.speechSynthesis?.cancel();
-    if (!turns.some((t) => t.speaker === "candidate")) { nav({ to: "/" }); return; }
+    endingRef.current = true;
+    try { convo.endSession(); } catch {}
+    const final = turnsRef.current;
+    if (!final.some((t) => t.speaker === "candidate")) { nav({ to: "/" }); return; }
     setPhase("scoring");
     try {
-      const results = await score({ data: payload(d, turns) });
-      const done: Draft = { ...d, transcript: turns, durationSec: elapsed, results };
+      const results = await score({ data: {
+        jd: d.jd, duration: d.duration, round: roundName(d), interviewers: d.interviewers, additional: d.additional, cv: d.cv,
+        title: d.analysis!.title, company: d.analysis!.company, interviewer: d.prep!.interviewer, plan: d.plan!,
+        transcript: final.slice(-80), elapsedSec: elapsed,
+      } });
+      const done: Draft = { ...d, transcript: final, durationSec: elapsed, results };
       const jobId = recordAttempt(done);
       saveDraft({ ...done, jobId });
       nav({ to: "/results" });
     } catch (e: any) {
       setError(e.message);
-      setPhase("listening");
+      setPhase("ended");
     }
   }
+  const closing = phase === "ended";
+  const mic = !micOff && phase === "listening";
+  const toggleMic = () => setMicOff(!micOff);
 
   if (!d?.prep) return null;
   const current = [...turns].reverse().find((t) => t.speaker === "interviewer");
