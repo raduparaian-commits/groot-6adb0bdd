@@ -47,11 +47,27 @@ function JdPage() {
   const [chars, setChars] = useState(0);
   const [extractError, setExtractError] = useState<string | null>(null);
 
+  const [sliding, setSliding] = useState(false);
   useEffect(() => {
     const dr = loadDraft();
     if (!dr.jobId) setJd(dr.jd);
-    if (dr.unlocked) setUnlocked(true);
+    if (dr.unlocked) {
+      // Returning to an unlocked draft drops straight into step 2, never showing both steps at once.
+      setUnlocked(true);
+      setHideStep1(true);
+    }
   }, []);
+  // While step 1 is on screen the page cannot be scrolled manually, so step 2 stays locked until Next is pressed.
+  useEffect(() => {
+    if (hideStep1 || sliding || step >= 0) {
+      document.body.style.overflow = "";
+      return;
+    }
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [hideStep1, sliding, step]);
   const ok = jd.trim().length > 0;
   const set = (p: Partial<Draft>) => setD((prev) => (prev ? { ...prev, ...p } : prev));
 
