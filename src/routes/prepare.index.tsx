@@ -213,10 +213,11 @@ function JdPage() {
         </section>
         {(error || extractError) && <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error || extractError}</p>}
         <div className="flex justify-between pb-14">
-          <Button variant="ghost" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Back</Button>
+          <Button variant="ghost" onClick={back}>Back</Button>
           <Button size="lg" onClick={go} disabled={!d?.interviewers.length}>Build My Interview</Button>
         </div>
       </div>
+      )}
     </div>
   );
 }
