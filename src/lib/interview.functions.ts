@@ -63,13 +63,13 @@ export const generateQuestions = createServerFn({ method: "POST" })
       [
         {
           role: "system",
-          content: `You are a realistic ${data.kind === "university" ? "admissions tutor" : "hiring manager"} at ${data.target} interviewing for: ${data.role}. They value: ${data.values.join(", ")}. Write 6 interview questions that probe specifically the experiences, claims and interests in the candidate's application below. Reference their own words. Mix in one or two questions that test fit with ${data.target}'s style. Return JSON: {"questions": string[]}.`,
+          content: `You are a realistic ${data.kind === "university" ? "admissions tutor" : "hiring manager"} at ${data.target} interviewing for: ${data.role}. They value: ${data.values.join(", ")}. Write 6 interview questions that probe specifically the experiences, claims and interests in the candidate's application below. Reference their own words. Mix in one or two questions that test fit with ${data.target}'s style. Return ONLY JSON: {"questions": string[]}.`,
         },
         { role: "user", content: data.application },
       ],
-      true,
     );
-    const parsed = JSON.parse(content) as { questions: string[] };
+    const m = content.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(m ? m[0] : content) as { questions: string[] };
     return { questions: parsed.questions.slice(0, 8) };
   });
 
