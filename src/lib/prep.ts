@@ -29,7 +29,8 @@ export interface Results {
   categories: { roleRelevance: number; evidence: number; structure: number; technical: number; communication: number; effectiveness: number };
   didWell: string[]; improve: string[]; missed: string[];
   jdCoverage: { competency: string; covered: "strong" | "partial" | "missing" }[];
-  perQuestion: { question: string; answer: string; score: number; feedback: string; improved: string }[];
+  perQuestion: { question: string; answer: string; score: number; feedback: string; improved: string; mistakes?: { quote: string; issue: string }[] | undefined }[];
+  saved?: boolean | undefined;
   nextAction: string;
 }
 export interface Draft {
