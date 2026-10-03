@@ -124,7 +124,8 @@ function JdPage() {
     const t = setInterval(() => setStep((s) => Math.min(s + 1, 2)), 2500);
     try {
       const r = await build({ data: { jd: d.jd, duration: d.duration, round: roundName(d), interviewers: d.interviewers, additional: d.additional, cv: d.cv, previousSignatures: previousSignatures(d.jobId) } });
-      saveDraft({ ...d, ...r, transcript: undefined, results: undefined });
+      const p = newPersona(d.prep?.interviewer.name);
+      saveDraft({ ...d, ...r, prep: { ...r.prep, interviewer: { ...r.prep.interviewer, name: p.name } }, voiceId: p.voiceId, transcript: undefined, results: undefined });
       nav({ to: "/prepare/room" });
     } catch (e: any) {
       const raw = e?.message ?? "";

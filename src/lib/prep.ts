@@ -38,6 +38,7 @@ export interface Draft {
   interviewers: string[]; additional: string; cv: string; scheduledDate?: string | undefined;
   analysis?: JdAnalysis | undefined; prep?: PrepInfo | undefined; plan?: PlanItem[] | undefined;
   transcript?: Turn[] | undefined; durationSec?: number | undefined; results?: Results | undefined;
+  voiceId?: string | undefined;
 }
 export interface Attempt { id: string; date: string; score: number; results: Results; signatures: string[] }
 export interface Round {
@@ -73,12 +74,36 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 
 /** Interviewer personas — name gender matches the ElevenLabs voice. */
 export interface Persona { name: string; voiceId: string; gender: "male" | "female" }
-export const PERSONAS: Persona[] = [
-  { name: "James Whitfield", voiceId: "JBFqnCBsd6RMkjVDRZzb", gender: "male" },   // George
-  { name: "Sarah Bennett", voiceId: "EXAVITQu4vr4xnSDxMaL", gender: "female" },    // Sarah
-  { name: "Arthur Hale", voiceId: "CwhRBWXzGAHq8TQ4Fs17", gender: "male" },        // Roger
-  { name: "Emily Carson", voiceId: "9BWtsMINqrJLrRacOk9x", gender: "female" },     // Aria
+const VOICES: { id: string; gender: "male" | "female" }[] = [
+  { id: "JBFqnCBsd6RMkjVDRZzb", gender: "male" },   // George
+  { id: "CwhRBWXzGAHq8TQ4Fs17", gender: "male" },   // Roger
+  { id: "onwK4e9ZLuTAKqWW03F9", gender: "male" },   // Daniel
+  { id: "nPczCjzI2devNBz1zQrb", gender: "male" },   // Brian
+  { id: "TX3LPaxmHKxFdv7VOQHJ", gender: "male" },   // Liam
+  { id: "IKne3meq5aSn9XLyUdCD", gender: "male" },   // Charlie
+  { id: "EXAVITQu4vr4xnSDxMaL", gender: "female" }, // Sarah
+  { id: "Xb7hH8MSUJpSbSDYk0k2", gender: "female" }, // Alice
+  { id: "XrExE9yKIg1WjnnlVkGX", gender: "female" }, // Matilda
+  { id: "FGY2WhTYpPnrIDTdsKH5", gender: "female" }, // Laura
+  { id: "cgSgspJ2msm6clMCkdW9", gender: "female" }, // Jessica
+  { id: "pFZP5JQG7iQjIQuC4Bku", gender: "female" }, // Lily
 ];
+const FIRST = {
+  male: ["James", "Oliver", "Daniel", "Thomas", "Marcus", "Ethan", "Samuel", "Arjun", "Leo", "Henry", "Owen", "Rafael"],
+  female: ["Sarah", "Emily", "Hannah", "Priya", "Chloe", "Grace", "Amara", "Sophie", "Isabel", "Leah", "Maya", "Charlotte"],
+};
+const LAST = ["Whitfield", "Bennett", "Hale", "Carson", "Patel", "Morgan", "Okafor", "Reed", "Hughes", "Clarke", "Nguyen", "Ellis", "Foster", "Ahmed", "Walsh", "Turner"];
+const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)]!;
+/** Generate a fresh interviewer: random voice + a name matching its gender. Avoids repeating the previous name. */
+export function newPersona(avoid?: string): Persona {
+  for (let i = 0; i < 10; i++) {
+    const v = pick(VOICES);
+    const name = `${pick(FIRST[v.gender])} ${pick(LAST)}`;
+    if (name !== avoid) return { name, voiceId: v.id, gender: v.gender };
+  }
+  const v = pick(VOICES);
+  return { name: `${pick(FIRST[v.gender])} ${pick(LAST)}`, voiceId: v.id, gender: v.gender };
+}
 
 /** Signatures of questions already asked for this job — used to avoid repetition on retry. */
 export function previousSignatures(jobId?: string): string[] {
