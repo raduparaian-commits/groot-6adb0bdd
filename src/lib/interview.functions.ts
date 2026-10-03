@@ -73,22 +73,34 @@ export const generateQuestions = createServerFn({ method: "POST" })
     return { questions: parsed.questions.slice(0, 8) };
   });
 
+export interface QuestionFeedback {
+  score: number;
+  improvements: string[];
+  ideal: string;
+}
+export interface Feedback {
+  overall: string;
+  overallScore: number;
+  perQuestion: QuestionFeedback[];
+}
+
 export const getFeedback = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     AppSchema.extend({
       transcript: z.array(z.object({ q: z.string(), a: z.string().max(5000) })).max(10),
     }).parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<Feedback> => {
     const content = await ai([
       {
         role: "system",
-        content: `You are an interview coach for ${data.target} (${data.role}). Give concise, specific feedback in markdown-free plain text: an overall impression, 3 strengths, 3 things to improve, and a score out of 10. Judge against what ${data.target} values: ${data.values.join(", ")}.`,
+        content: `You are an interview coach for ${data.target} (${data.role}). Judge against what ${data.target} values: ${data.values.join(", ")}. For EACH answer give: a score 1-10, 2-4 short specific improvement notes, and an "ideal" revised answer (a natural spoken response of 90-160 words, written in first person, built only from facts in the candidate's application and answer). Also an overall summary (2-3 sentences) and overallScore 1-10. Return ONLY JSON: {"overall": string, "overallScore": number, "perQuestion": [{"score": number, "improvements": string[], "ideal": string}]} with perQuestion in the same order as the questions.`,
       },
       {
         role: "user",
-        content: `APPLICATION:\n${data.application}\n\nINTERVIEW:\n${data.transcript.map((t, i) => `Q${i + 1}: ${t.q}\nA: ${t.a}`).join("\n\n")}`,
+        content: `APPLICATION:\n${data.application}\n\nINTERVIEW:\n${data.transcript.map((t, i) => `Q${i + 1}: ${t.q}\nA: ${t.a || "(no answer)"}`).join("\n\n")}`,
       },
     ]);
-    return { feedback: content };
+    const m = content.match(/\{[\s\S]*\}/);
+    return JSON.parse(m ? m[0] : content) as Feedback;
   });
