@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { DURATIONS, INTERVIEWERS, ROUNDS, loadDraft, newDraft, previousSignatures, roundName, saveDraft, type Draft } from "@/lib/prep";
+import { DURATIONS, INTERVIEWERS, ROUNDS, loadDraft, newDraft, newPersona, previousSignatures, roundName, saveDraft, type Draft } from "@/lib/prep";
 import { buildInterview } from "@/lib/prep.functions";
 
 export const Route = createFileRoute("/prepare/")({
