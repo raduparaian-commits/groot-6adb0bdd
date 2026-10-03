@@ -8,75 +8,27 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
-import { Menu, X, Sprout } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-const NAV_LINKS = [
-  { to: "/interviews", label: "Mock Interviews" },
-  { to: "/applications", label: "Mock Applications" },
-] as const;
-
 function Header() {
-  const [open, setOpen] = useState(false);
-
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+        <Link to="/" className="flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Sprout className="h-5 w-5" />
           </span>
           <span className="font-display text-xl font-semibold tracking-tight">Groot</span>
         </Link>
-
-        <nav className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "rounded-md px-3 py-2 text-sm font-medium bg-secondary text-secondary-foreground" }}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Button asChild size="sm" className="ml-3">
-            <Link to="/interviews">Start practicing</Link>
-          </Button>
-        </nav>
-
-        <button
-          type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="rounded-md p-2 text-foreground md:hidden"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <Button asChild size="lg">
+          <Link to="/applications">Start practicing</Link>
+        </Button>
       </div>
-
-      {open && (
-        <nav className="border-t border-border/70 bg-background px-4 py-3 md:hidden">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              onClick={() => setOpen(false)}
-              className="block rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "block rounded-md px-3 py-2.5 text-sm font-medium bg-secondary text-secondary-foreground" }}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Button asChild size="sm" className="mt-2 w-full">
-            <Link to="/interviews" onClick={() => setOpen(false)}>Start practicing</Link>
-          </Button>
-        </nav>
-      )}
     </header>
   );
 }
