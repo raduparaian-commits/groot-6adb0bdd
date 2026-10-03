@@ -1,157 +1,87 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Sprout,
-  Mic,
-  FileText,
-  Target,
-  ArrowRight,
-  GraduationCap,
-  Briefcase,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { loadJobs, progressFor, type Job } from "@/lib/prep";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Groot — AI interview practice & automatic tracker" },
+      { name: "description", content: "Paste a job description, practise a live AI interview that adapts to you, and track every round automatically." },
+      { property: "og:title", content: "Groot — AI interview practice & automatic tracker" },
+      { property: "og:description", content: "Paste a job description, practise a live AI interview that adapts to you, and track every round automatically." },
+    ],
+  }),
+  component: Home,
 });
 
-function Index() {
+const FILTERS = ["All", "Preparing", "Scheduled", "Waiting", "Completed"] as const;
+
+function statusOf(j: Job) { return j.rounds.at(-1)?.realStatus ?? "Preparing"; }
+function matches(j: Job, f: (typeof FILTERS)[number]) {
+  const s = statusOf(j);
+  if (f === "All") return true;
+  if (f === "Waiting") return s === "Waiting for outcome";
+  if (f === "Completed") return ["Passed", "Rejected", "Offer"].includes(s);
+  return s === f;
+}
+
+function Home() {
+  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
+  useEffect(() => setJobs(loadJobs()), []);
+
   return (
-    <div>
-      {/* Hero */}
-      <section className="bark-line border-b border-border/70">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-          <Badge variant="outline" className="mb-6 border-primary/40 text-primary">
-            <Sprout className="mr-1 h-3.5 w-3.5" />
-            Practice that grows with you
-          </Badge>
-          <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
-            Mock interviews and applications that{" "}
-            <span className="text-primary">adapt to your university or job</span>.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Tell Groot which university or role you're aiming for. It tailors
-            practice questions, feedback, and application coaching to exactly
-            that — no generic prep.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/applications">
-                Start a mock interview
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/applications">Practice an application</Link>
-            </Button>
-          </div>
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <GraduationCap className="h-4 w-4" /> University admissions practice
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Briefcase className="h-4 w-4" /> Job interview & application coaching
-            </span>
-          </div>
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <section className="rounded-3xl bg-surface p-10 text-surface-foreground sm:p-14">
+        <h1 className="font-display max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
+        <p className="mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
+        <Button asChild size="lg" className="mt-8"><Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
       </section>
 
-      {/* What you can practice */}
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <h2 className="font-display text-3xl font-semibold tracking-tight">
-          Two ways to practice
-        </h2>
-        <p className="mt-3 max-w-xl text-muted-foreground">
-          Every session adapts to the specific university, course, or company
-          you choose — from question style to what they actually ask about.
-        </p>
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          <Card className="group transition-shadow hover:shadow-md">
-            <CardContent className="p-8">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-                <Mic className="h-5 w-5" />
-              </span>
-              <h3 className="mt-5 font-display text-2xl font-semibold">Mock Interviews</h3>
-              <p className="mt-3 text-muted-foreground">
-                Talk through questions picked for your target role or program.
-                Practice spoken answers and get feedback on what to sharpen.
-              </p>
-              <Button asChild variant="ghost" className="mt-6 -ml-4 px-4">
-                <Link to="/applications">
-                  Try an interview <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="group transition-shadow hover:shadow-md">
-            <CardContent className="p-8">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-                <FileText className="h-5 w-5" />
-              </span>
-              <h3 className="mt-5 font-display text-2xl font-semibold">Mock Applications</h3>
-              <p className="mt-3 text-muted-foreground">
-                Rehearse personal statements, cover letters, and application
-                answers shaped around the university or job you're applying to.
-              </p>
-              <Button asChild variant="ghost" className="mt-6 -ml-4 px-4">
-                <Link to="/applications">
-                  Try an application <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* How it adapts */}
-      <section className="border-y border-border/70 bg-muted/40">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="grid gap-10 md:grid-cols-3">
-            {[
-              {
-                icon: Target,
-                title: "Pick your target",
-                body: "Name the university, course, or company — Groot builds its question bank around what they actually ask.",
-              },
-              {
-                icon: Mic,
-                title: "Practice out loud",
-                body: "Speak your answers in a realistic interview flow, with follow-up questions that react to what you say.",
-              },
-              {
-                icon: FileText,
-                title: "Get tailored feedback",
-                body: "Every round ends with notes tied to your specific target — not generic interview advice.",
-              },
-            ].map((step) => (
-              <div key={step.title}>
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <step.icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 font-display text-xl font-semibold">{step.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{step.body}</p>
-              </div>
+      <section className="mt-14">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-3 py-1 text-sm ${filter === f ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>{f}</button>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* CTA */}
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div className="rounded-2xl bg-primary px-8 py-14 text-center text-primary-foreground">
-          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Ready to practice for your target?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-primary-foreground/80">
-            Pick a university or a job and Groot does the rest.
+        {jobs && jobs.length === 0 && (
+          <p className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
+            No interviews yet. Complete your first mock interview and it will appear here automatically.
           </p>
-          <Button asChild size="lg" variant="secondary" className="mt-8">
-            <Link to="/applications">
-              Start now <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+        )}
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          {jobs?.filter((j) => matches(j, filter)).map((j) => {
+            const round = j.rounds.at(-1);
+            const atts = round?.attempts ?? [];
+            const latest = atts.at(-1);
+            const prev = atts.at(-2);
+            return (
+              <Card key={j.id}>
+                <CardContent className="space-y-4 p-6">
+                  <div>
+                    <p className="font-display text-xl font-semibold">{j.title}</p>
+                    <p className="text-sm text-muted-foreground">{j.company}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div><p className="text-muted-foreground">Current round</p><p className="font-medium">{round?.name}</p></div>
+                    <div><p className="text-muted-foreground">Real status</p><p className="font-medium">{statusOf(j)}</p></div>
+                    <div><p className="text-muted-foreground">Latest mock score</p><p className="font-medium">{latest ? `${latest.score}/100` : "—"}</p></div>
+                    <div><p className="text-muted-foreground">Previous</p><p className="font-medium">{prev ? `${prev.score}/100` : "—"}</p></div>
+                  </div>
+                  {round && <div><div className="flex justify-between text-sm"><span>Preparation</span><span>{progressFor(round)}%</span></div><Progress className="mt-2" value={progressFor(round)} /></div>}
+                  <p className="text-xs text-muted-foreground">Last practice {latest ? new Date(latest.date).toLocaleDateString() : "—"}</p>
+                  <Button asChild className="w-full"><Link to="/jobs/$id" params={{ id: j.id }}>Continue Preparation</Link></Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
     </div>

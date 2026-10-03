@@ -25,9 +25,12 @@ function Header() {
           </span>
           <span className="font-display text-xl font-semibold tracking-tight">Groot</span>
         </Link>
-        <Button asChild size="lg">
-          <Link to="/applications">Start practicing</Link>
-        </Button>
+        <div className="flex items-center gap-4">
+          <Link to="/" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">My interviews</Link>
+          <Button asChild size="lg">
+            <Link to="/prepare">Prepare for an Interview</Link>
+          </Button>
+        </div>
       </div>
     </header>
   );
@@ -44,14 +47,14 @@ function Footer() {
           <span className="font-display text-lg font-semibold">Groot</span>
         </div>
         <p className="text-sm text-surface-foreground/70">
-          Practice interviews and applications that adapt to every university and job.
+          Realistic AI interview practice that adapts to every job description.
         </p>
         <nav className="flex gap-4 text-sm">
-          <Link to="/interviews" className="text-surface-foreground/80 hover:text-surface-foreground">
-            Interviews
+          <Link to="/" className="text-surface-foreground/80 hover:text-surface-foreground">
+            My interviews
           </Link>
-          <Link to="/applications" className="text-surface-foreground/80 hover:text-surface-foreground">
-            Applications
+          <Link to="/prepare" className="text-surface-foreground/80 hover:text-surface-foreground">
+            Prepare
           </Link>
         </nav>
       </div>

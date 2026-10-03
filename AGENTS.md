@@ -1,3 +1,4 @@
 # Agents
-- Presets (targets, values, application questions) live in one shared data module so applications and interviews adapt from a single source.
-- AI calls run in server functions only; the submitted application passes to the interview via session storage (no backend yet).
+- Prep flow types, options and tracker storage live in src/lib/prep.ts so every screen shares one model.
+- AI calls run in server functions only (src/lib/prep.functions.ts using ai.server.ts).
+- Draft flow state passes between screens via sessionStorage; the tracker persists in localStorage until accounts are added.
