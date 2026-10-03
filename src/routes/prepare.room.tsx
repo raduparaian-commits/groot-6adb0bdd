@@ -72,7 +72,7 @@ function RoomPage() {
 
       <section>
         <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary">STAR preparation</h2>
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {STAR.map(([k, v]) => (
             <div key={k} className="rounded-xl border border-primary/30 bg-secondary/40 p-4">
               <p className="flex items-center gap-2 font-semibold"><span className="font-display text-2xl font-semibold leading-none text-primary">{k![0]}</span>{k}</p>
