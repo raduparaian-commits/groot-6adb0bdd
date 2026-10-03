@@ -7,7 +7,7 @@ const VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"; // George — calm, professional
 let cachedAgentId: string | null = null;
 
 function key() {
-  const k = process.env.ELEVENLABS_API_KEY;
+  const k = process.env['ELEVENLABS_API_KEY'];
   if (!k) throw new Error("ElevenLabs is not connected to this project");
   return k;
 }
