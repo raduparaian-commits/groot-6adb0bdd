@@ -36,7 +36,7 @@ function JdPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-14 sm:px-6">
       <Badge variant="outline" className="mb-4 border-primary/40 text-primary">Step 1 of 3</Badge>
       <h1 className="font-display text-4xl font-semibold tracking-tight">Tell us about the job</h1>
       <p className="mt-2 text-muted-foreground">Paste the full job description. Your interview adapts to every responsibility and skill in it.</p>
