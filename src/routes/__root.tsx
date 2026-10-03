@@ -9,37 +9,22 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-function PlantLogo({ size = 36 }: { size?: number }) {
-  return (
-    <span
-      className="flex items-center justify-center rounded-lg bg-primary text-primary-foreground"
-      style={{ height: size, width: size }}
-    >
-      <svg viewBox="0 0 32 32" fill="none" className="h-[70%] w-[70%]" aria-hidden>
-        <ellipse className="plant-ground" cx="16" cy="27" rx="7" ry="1.6" fill="currentColor" opacity="0.5" />
-        <g className="plant-stem">
-          <path d="M16 27 C16 21 16 17 16 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          <path className="plant-leaf" d="M16 18 C11 18 8 15 7 10 C12 10 15 13 16 18 Z" fill="currentColor" />
-          <path className="plant-leaf plant-leaf-r" d="M16 15 C21 15 24 12 25 7 C20 7 17 10 16 15 Z" fill="currentColor" />
-        </g>
-      </svg>
-    </span>
-  );
-}
-
 function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
-          <PlantLogo size={36} />
-          <span className="font-display text-xl font-medium tracking-tight">Groot</span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Sprout className="h-5 w-5" />
+          </span>
+          <span className="font-display text-xl font-semibold tracking-tight">Groot</span>
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">Home</Link>
@@ -57,11 +42,13 @@ function Footer() {
     <footer className="mt-auto border-t border-border/70 bg-surface text-surface-foreground">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-2">
-          <PlantLogo size={32} />
-          <span className="font-display text-lg font-medium">Groot</span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Sprout className="h-4 w-4" />
+          </span>
+          <span className="font-display text-lg font-semibold">Groot</span>
         </div>
         <p className="text-sm text-surface-foreground/70">
-          Practice. Grow. Get Ready.
+          Realistic AI interview practice that adapts to every job description.
         </p>
         <nav className="flex gap-4 text-sm">
           <Link to="/" className="text-surface-foreground/80 hover:text-surface-foreground">
@@ -141,9 +128,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Groot — Practice. Grow. Get Ready." },
+      { title: "Groot — Practice that adapts to you" },
       { name: "description", content: "Mock interviews and mock applications that adapt to every university and job." },
-      { property: "og:title", content: "Groot — Practice. Grow. Get Ready." },
+      { property: "og:title", content: "Groot — Practice that adapts to you" },
       { property: "og:description", content: "Mock interviews and mock applications that adapt to every university and job." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

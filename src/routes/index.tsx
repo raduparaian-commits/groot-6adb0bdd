@@ -56,10 +56,10 @@ function Home() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
             </span>
-            <span className="text-xs font-medium uppercase tracking-widest text-primary">Practice. Grow. Get Ready</span>
+            <span className="text-xs font-medium uppercase tracking-widest text-primary">AI Interview Coach</span>
           </div>
-          <h1 className="font-display text-4xl font-medium leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
-          <p className="mx-auto mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers, then gives honest feedback that never invents your experience.</p>
+          <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
+          <p className="mx-auto mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
           <div className="mt-10 flex justify-center">
             <Button asChild size="lg" className="h-12 px-8 text-base" style={{ boxShadow: "0 0 32px color-mix(in oklab, var(--primary) 35%, transparent)" }}>
               <Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -70,7 +70,7 @@ function Home() {
 
       <section id="interviews" className="scroll-mt-24">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
-          <h2 className="font-display text-3xl font-medium">Your interviews</h2>
+          <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
         {jobs && jobs.length === 0 && (
           <p className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
             No interviews yet. Complete your first mock interview and it will appear here automatically.
