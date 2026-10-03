@@ -33,11 +33,38 @@ function Home() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-      <section className="rounded-3xl bg-surface p-10 text-surface-foreground sm:p-14">
-        <h1 className="font-display max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
-        <p className="mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button asChild size="lg"><Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+      <section className="relative overflow-hidden rounded-3xl bg-surface px-6 py-20 text-center text-surface-foreground sm:py-28">
+        {/* Neural pulse background */}
+        <div aria-hidden className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--primary) 1px, transparent 1px), linear-gradient(90deg, var(--primary) 1px, transparent 1px)",
+              backgroundSize: "44px 44px",
+            }}
+          />
+          <div className="hero-orb absolute top-1/4 -left-24 h-80 w-80 rounded-full bg-primary opacity-15 blur-[130px]" />
+          <div className="hero-orb absolute bottom-1/4 -right-24 h-72 w-72 rounded-full bg-primary opacity-15 blur-[110px]" style={{ animationDelay: "-4.5s" }} />
+          <div className="hero-ring absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10" />
+          <div className="hero-ring absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/15" style={{ animationDelay: "-2s" }} />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-2xl">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-card/70 px-4 py-1.5 backdrop-blur">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <span className="text-xs font-medium uppercase tracking-widest text-primary">AI Interview Coach</span>
+          </div>
+          <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
+          <p className="mx-auto mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
+          <div className="mt-10 flex justify-center">
+            <Button asChild size="lg" className="h-12 px-8 text-base" style={{ boxShadow: "0 0 32px color-mix(in oklab, var(--primary) 35%, transparent)" }}>
+              <Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </div>
         </div>
       </section>
 
