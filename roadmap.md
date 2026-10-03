@@ -9,6 +9,7 @@
 - [x] About step: real interview date field, shown in the tracker
 - [x] About step: CV file upload with automatic text extraction
 - [ ] Accounts + saved data in Lovable Cloud (tracker currently saved in this browser)
-- [ ] Interview page: separate video toggles (candidate camera / AI interviewer video), cycle ElevenLabs voices with gender-matched names, lip-synced AI persona video only when toggled
 
 - [x] Live page: user camera toggle, AI interviewer video toggle, voice/persona cycler (gender-matched names)
+- [x] Step 3 (preparation room): back button to step 2
+- [x] Retheme: black canvas + neon green palette (styles.css tokens)

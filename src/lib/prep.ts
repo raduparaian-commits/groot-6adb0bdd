@@ -37,6 +37,7 @@ export interface Draft {
   jobId?: string | undefined; roundId?: string | undefined;
   jd: string; duration: number; round: string; roundOther: string;
   interviewers: string[]; additional: string; cv: string; scheduledDate?: string | undefined;
+  unlocked?: boolean | undefined;
   analysis?: JdAnalysis | undefined; prep?: PrepInfo | undefined; plan?: PlanItem[] | undefined;
   transcript?: Turn[] | undefined; durationSec?: number | undefined; results?: Results | undefined;
   voiceId?: string | undefined;

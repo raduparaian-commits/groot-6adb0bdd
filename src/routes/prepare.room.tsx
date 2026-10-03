@@ -38,7 +38,10 @@ function RoomPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-14 sm:px-6">
       <div>
-        <Badge variant="outline" className="mb-4 border-primary/40 text-primary">Step 3 of 3</Badge>
+        <div className="mb-4 flex items-center justify-between">
+          <Badge variant="outline" className="border-primary/40 text-primary">Step 3 of 3</Badge>
+          <Button asChild variant="ghost" size="sm"><Link to="/prepare">← Back</Link></Button>
+        </div>
         <h1 className="font-display text-4xl font-semibold tracking-tight">Your interview with {d.prep.interviewer.name} is ready</h1>
         <p className="mt-2 text-xl">{d.analysis.title}</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
