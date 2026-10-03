@@ -99,6 +99,6 @@ ${data.additional || "none"}
 
 CANDIDATE CV / APPLICATION:
 ${data.cv || "not provided — ask about their background instead"}`;
-    const firstMessage = `Hello, I'm ${data.interviewer.name}, ${data.interviewer.role}. Thanks for making the time today. To start us off, could you briefly introduce yourself and tell me what attracted you to this ${data.title} role?`;
+    const firstMessage = `Hello, I'm ${name}, ${data.interviewer.role}. Thanks for making the time today. To start us off, could you briefly introduce yourself and tell me what attracted you to this ${data.title} role?`;
     return { token, prompt, firstMessage };
   });
