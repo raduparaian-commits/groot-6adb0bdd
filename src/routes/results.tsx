@@ -3,14 +3,15 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { loadDraft, roundName, saveDraft, type Draft } from "@/lib/prep";
+import { toast } from "sonner";
+import { loadDraft, recordAttempt, roundName, saveDraft, type Draft } from "@/lib/prep";
 
 export const Route = createFileRoute("/results")({
   head: () => ({
     meta: [
-      { title: "Interview results — Groot" },
+      { title: "Post interview feedback — Groot" },
       { name: "description", content: "Your score, what went well, what to improve and honest question-by-question feedback." },
-      { property: "og:title", content: "Interview results — Groot" },
+      { property: "og:title", content: "Post interview feedback — Groot" },
       { property: "og:description", content: "Your score, what went well, what to improve and honest question-by-question feedback." },
     ],
   }),
@@ -29,6 +30,38 @@ function List({ title, items }: { title: string; items: string[] }) {
   );
 }
 
+
+type Mistake = { quote: string; issue: string };
+/** Split an answer into plain and mistake segments by locating each quoted mistake. */
+function segments(answer: string, mistakes: Mistake[]) {
+  const lower = answer.toLowerCase();
+  const ranges: { s: number; e: number; m: Mistake }[] = [];
+  for (const m of mistakes) {
+    const q = m.quote.trim();
+    if (!q) continue;
+    const s = lower.indexOf(q.toLowerCase());
+    if (s >= 0 && !ranges.some((r) => s < r.e && s + q.length > r.s)) ranges.push({ s, e: s + q.length, m });
+  }
+  ranges.sort((a, b) => a.s - b.s);
+  const out: { text: string; m?: Mistake }[] = [];
+  let i = 0;
+  for (const r of ranges) { if (r.s > i) out.push({ text: answer.slice(i, r.s) }); out.push({ text: answer.slice(r.s, r.e), m: r.m }); i = r.e; }
+  if (i < answer.length) out.push({ text: answer.slice(i) });
+  return out;
+}
+const words = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
+
+function Pie({ pct }: { pct: number }) {
+  const r = 70, c = 2 * Math.PI * r;
+  return (
+    <svg viewBox="0 0 180 180" className="h-44 w-44 -rotate-90">
+      <circle cx="90" cy="90" r={r} fill="none" strokeWidth="36" className="stroke-primary" />
+      <circle cx="90" cy="90" r={r} fill="none" strokeWidth="36" className="stroke-destructive"
+        strokeDasharray={`${(pct / 100) * c} ${c}`} />
+    </svg>
+  );
+}
+
 function ResultsPage() {
   const nav = useNavigate();
   const [d, setD] = useState<Draft | null>(null);
@@ -39,6 +72,20 @@ function ResultsPage() {
   }, []);
   const r = d?.results;
   if (!d || !r) return null;
+
+  const qs = r.perQuestion.map((q) => ({ ...q, segs: segments(q.answer || "", q.mistakes ?? []) }));
+  const total = qs.reduce((n, q) => n + words(q.answer || ""), 0);
+  const bad = qs.reduce((n, q) => n + q.segs.filter((x) => x.m).reduce((k, x) => k + words(x.text), 0), 0);
+  const pct = total ? Math.round((bad / total) * 100) : 0;
+
+  function saveInterview() {
+    if (d!.results?.saved) return;
+    const jobId = recordAttempt(d!);
+    const next = { ...d!, jobId, results: { ...d!.results!, saved: true } };
+    saveDraft(next);
+    setD(next);
+    toast.success("Interview saved — it now shows on your home page.");
+  }
 
   function retry() {
     saveDraft({ ...d!, prep: undefined, plan: undefined, transcript: undefined, results: undefined });
@@ -53,11 +100,29 @@ function ResultsPage() {
           <span className="text-sm opacity-80">/ 100</span>
         </div>
         <div>
-          <h1 className="font-display text-4xl font-semibold tracking-tight">Your results</h1>
+          <h1 className="font-display text-4xl font-semibold tracking-tight">Post interview feedback</h1>
           <p className="mt-1 text-muted-foreground">{d.analysis?.title} · {d.analysis?.company} · {roundName(d)}</p>
           <p className="mt-3 text-sm"><strong>Next:</strong> {r.nextAction}</p>
         </div>
       </div>
+
+      <Card>
+        <CardContent className="flex flex-col items-center gap-6 p-6 sm:flex-row">
+          <div className="relative">
+            <Pie pct={pct} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="font-display text-3xl font-semibold">{pct}%</span>
+              <span className="text-xs text-muted-foreground">mistakes</span>
+            </div>
+          </div>
+          <div className="space-y-2 text-sm">
+            <h2 className="font-display text-xl font-semibold">How much of what you said had mistakes</h2>
+            <p className="text-muted-foreground">Based on {total} words you spoke across {qs.length} questions.</p>
+            <p className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-destructive" />Mistakes — {pct}%</p>
+            <p className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-primary" />Fine — {100 - pct}%</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-3">
         {CATS.map(([k, label]) => (
@@ -85,26 +150,40 @@ function ResultsPage() {
 
       <section className="space-y-4">
         <h2 className="font-display text-2xl font-semibold">Question-by-question feedback</h2>
-        {r.perQuestion.map((q, i) => (
+        {qs.map((q, i) => (
           <Card key={i}>
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <CardTitle className="text-base leading-snug">Q{i + 1}. {q.question}</CardTitle>
               <span className="shrink-0 rounded-lg bg-secondary px-3 py-1 font-semibold">{q.score}</span>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-              <p className="text-muted-foreground">{q.feedback}</p>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-border bg-muted/40 p-4"><p className="text-xs font-semibold uppercase text-muted-foreground">Your answer</p><p className="mt-2 whitespace-pre-wrap">{q.answer}</p></div>
-                <div className="rounded-xl border border-primary/40 bg-secondary/40 p-4"><p className="text-xs font-semibold uppercase text-primary">Improved structure</p><p className="mt-2 whitespace-pre-wrap">{q.improved}</p></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4">
+                <p className="text-xs font-semibold uppercase text-muted-foreground">What you said</p>
+                <p className="mt-2 whitespace-pre-wrap leading-relaxed">
+                  {q.segs.length ? q.segs.map((x, k) => x.m
+                    ? <mark key={k} title={x.m.issue} className="rounded bg-destructive/15 px-0.5 text-destructive underline decoration-destructive decoration-wavy">{x.text}</mark>
+                    : <span key={k}>{x.text}</span>) : <span className="text-muted-foreground">No answer recorded.</span>}
+                </p>
               </div>
+              <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4">
+                <p className="text-xs font-semibold uppercase text-destructive">Mistakes made</p>
+                {q.mistakes?.length ? (
+                  <ul className="mt-2 space-y-2">{q.mistakes.map((m, k) => (
+                    <li key={k}><span className="font-medium text-destructive">"{m.quote}"</span> — {m.issue}</li>
+                  ))}</ul>
+                ) : <p className="mt-2 text-muted-foreground">No clear mistakes in this answer.</p>}
+              </div>
+              <p className="text-muted-foreground"><strong className="text-foreground">How to improve:</strong> {q.feedback}</p>
+              <div className="rounded-xl border border-primary/40 bg-secondary/40 p-4"><p className="text-xs font-semibold uppercase text-primary">Improved answer</p><p className="mt-2 whitespace-pre-wrap">{q.improved}</p></div>
             </CardContent>
           </Card>
         ))}
       </section>
 
       <div className="flex flex-wrap gap-3">
-        <Button size="lg" onClick={retry}>Retry with new questions</Button>
-        {d.jobId && <Button asChild size="lg" variant="outline"><Link to="/jobs/$id" params={{ id: d.jobId }}>View interview tracker</Link></Button>}
+        <Button size="lg" onClick={saveInterview} disabled={!!r.saved}>{r.saved ? "Interview saved" : "Save interview"}</Button>
+        <Button size="lg" variant="secondary" onClick={retry}>Retry with new questions</Button>
+        {r.saved && d.jobId && <Button asChild size="lg" variant="outline"><Link to="/jobs/$id" params={{ id: d.jobId }}>View interview tracker</Link></Button>}
         <Button asChild size="lg" variant="ghost"><Link to="/">Home</Link></Button>
       </div>
     </div>
