@@ -4,5 +4,8 @@
 - [x] Live adaptive AI interview (follow-ups, timing, no coaching)
 - [x] Results: 6 categories, JD coverage, placeholder-based improved answers
 - [x] Tracker detail: rounds, attempts, real status, retry, next round
-- [ ] ElevenLabs voice (blocked: connection skipped; uses browser voice)
+- [x] ElevenLabs voice interviewer connected (server-issued session token)
+- [ ] Landing page: tracker quick-access button + live-updating interview cards
+- [ ] About step: real interview date field, shown in the tracker
+- [ ] About step: CV file upload with automatic text extraction
 - [ ] Accounts + saved data in Lovable Cloud (tracker currently saved in this browser)

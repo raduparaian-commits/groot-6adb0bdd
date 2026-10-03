@@ -35,7 +35,7 @@ export interface Results {
 export interface Draft {
   jobId?: string | undefined; roundId?: string | undefined;
   jd: string; duration: number; round: string; roundOther: string;
-  interviewers: string[]; additional: string; cv: string;
+  interviewers: string[]; additional: string; cv: string; scheduledDate?: string | undefined;
   analysis?: JdAnalysis | undefined; prep?: PrepInfo | undefined; plan?: PlanItem[] | undefined;
   transcript?: Turn[] | undefined; durationSec?: number | undefined; results?: Results | undefined;
 }
