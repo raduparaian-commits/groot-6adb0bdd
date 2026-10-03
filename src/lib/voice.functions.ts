@@ -37,11 +37,26 @@ async function getAgentId(): Promise<string> {
         conversation: { max_duration_seconds: 3900 },
       },
       platform_settings: {
-        overrides: { conversation_config_override: { agent: { prompt: { prompt: true }, first_message: true } } },
+        overrides: { conversation_config_override: { agent: { prompt: { prompt: true }, first_message: true }, tts: { voice_id: true } } },
       },
     }),
   });
   return (cachedAgentId = created.agent_id as string);
+}
+
+let patched = false;
+/** Ensure an existing agent allows per-session voice overrides. */
+async function ensureVoiceOverride(agentId: string) {
+  if (patched) return;
+  patched = true;
+  await el(`/agents/${agentId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      platform_settings: {
+        overrides: { conversation_config_override: { agent: { prompt: { prompt: true }, first_message: true }, tts: { voice_id: true } } },
+      },
+    }),
+  }).catch(() => {});
 }
 
 const Input = z.object({
@@ -49,6 +64,7 @@ const Input = z.object({
   interviewers: z.array(z.string().max(60)).max(10), additional: z.string().max(4000), cv: z.string().max(20000),
   title: z.string().max(200), company: z.string().max(200),
   interviewer: z.object({ name: z.string().max(100), role: z.string().max(200) }),
+  personaName: z.string().max(100).optional(),
   plan: z.array(z.any()).max(20),
 });
 
@@ -56,9 +72,11 @@ export const startVoiceInterview = createServerFn({ method: "POST" })
   .inputValidator((d) => Input.parse(d))
   .handler(async ({ data }) => {
     const agentId = await getAgentId();
+    await ensureVoiceOverride(agentId);
     const { token } = await el(`/conversation/token?agent_id=${agentId}`);
+    const name = data.personaName || data.interviewer.name;
     const company = data.company && data.company !== "Unknown" ? data.company : "the organisation";
-    const prompt = `You are ${data.interviewer.name}, ${data.interviewer.role} at ${company}, conducting a live spoken "${data.round}" interview for the position of ${data.title}. Interview length: about ${data.duration} minutes. Interviewer type: ${data.interviewers.join(", ") || "not specified"}.
+    const prompt = `You are ${name}, ${data.interviewer.role} at ${company}, conducting a live spoken "${data.round}" interview for the position of ${data.title}. Interview length: about ${data.duration} minutes. Interviewer type: ${data.interviewers.join(", ") || "not specified"}.
 
 HOW TO BEHAVE
 - Act exactly like a real, professional human interviewer. Speak naturally, concisely, one question at a time (1-3 sentences per turn).
@@ -81,6 +99,6 @@ ${data.additional || "none"}
 
 CANDIDATE CV / APPLICATION:
 ${data.cv || "not provided — ask about their background instead"}`;
-    const firstMessage = `Hello, I'm ${data.interviewer.name}, ${data.interviewer.role}. Thanks for making the time today. To start us off, could you briefly introduce yourself and tell me what attracted you to this ${data.title} role?`;
+    const firstMessage = `Hello, I'm ${name}, ${data.interviewer.role}. Thanks for making the time today. To start us off, could you briefly introduce yourself and tell me what attracted you to this ${data.title} role?`;
     return { token, prompt, firstMessage };
   });
