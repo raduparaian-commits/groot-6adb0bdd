@@ -35,14 +35,14 @@ export interface Results {
 export interface Draft {
   jobId?: string | undefined; roundId?: string | undefined;
   jd: string; duration: number; round: string; roundOther: string;
-  interviewers: string[]; additional: string; cv: string;
+  interviewers: string[]; additional: string; cv: string; scheduledDate?: string | undefined;
   analysis?: JdAnalysis | undefined; prep?: PrepInfo | undefined; plan?: PlanItem[] | undefined;
   transcript?: Turn[] | undefined; durationSec?: number | undefined; results?: Results | undefined;
 }
 export interface Attempt { id: string; date: string; score: number; results: Results; signatures: string[] }
 export interface Round {
   id: string; name: string; interviewers: string[]; duration: number; additional: string;
-  realStatus: RealStatus; attempts: Attempt[];
+  realStatus: RealStatus; attempts: Attempt[]; scheduledDate?: string | undefined;
 }
 export interface Job {
   id: string; title: string; company: string; jd: string; analysis: JdAnalysis; cv: string;
@@ -90,9 +90,10 @@ export function recordAttempt(d: Draft): string {
   const name = roundName(d);
   let round = job.rounds.find((r) => r.id === d.roundId) ?? job.rounds.find((r) => r.name === name);
   if (!round) {
-    round = { id: uid(), name, interviewers: d.interviewers, duration: d.duration, additional: d.additional, realStatus: "Preparing", attempts: [] };
+    round = { id: uid(), name, interviewers: d.interviewers, duration: d.duration, additional: d.additional, realStatus: "Preparing", attempts: [], scheduledDate: d.scheduledDate || undefined };
     job.rounds.push(round);
   }
+  if (d.scheduledDate) round.scheduledDate = d.scheduledDate;
   round.attempts.push({ id: uid(), date: now, score: d.results.overallScore, results: d.results, signatures: (d.plan ?? []).map((p) => p.question_signature) });
   job.updatedAt = now;
   saveJobs(jobs);

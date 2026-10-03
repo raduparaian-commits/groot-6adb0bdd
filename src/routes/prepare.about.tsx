@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,11 @@ function AboutPage() {
   const [d, setD] = useState<Draft | null>(null);
   const [step, setStep] = useState(-1);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [reading, setReading] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [chars, setChars] = useState(0);
+  const [extractError, setExtractError] = useState<string | null>(null);
 
   useEffect(() => {
     const dr = loadDraft();
@@ -46,6 +51,43 @@ function AboutPage() {
   }, []);
   if (!d) return null;
   const set = (p: Partial<Draft>) => setD({ ...d, ...p });
+
+  async function readCv(file?: File) {
+    if (!file) return;
+    setReading(true);
+    setExtractError(null);
+    try {
+      let text = "";
+      const name = file.name.toLowerCase();
+      if (name.endsWith(".pdf")) {
+        const pdfjs = await import("pdfjs-dist");
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+        const doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+        const pages: string[] = [];
+        for (let i = 1; i <= Math.min(doc.numPages, 15); i++) {
+          const page = await doc.getPage(i);
+          const content = await page.getTextContent();
+          pages.push((content.items as { str?: string }[]).map((it) => it.str ?? "").join(" "));
+        }
+        text = pages.join("\n\n");
+      } else if (name.endsWith(".docx")) {
+        const mammoth = await import("mammoth/mammoth.browser.js");
+        text = (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+      } else {
+        text = await file.text();
+      }
+      text = text.replace(/[ \t]+\n/g, "\n").trim();
+      if (!text) throw new Error("No readable text found in that file — try pasting it below instead.");
+      setFileName(file.name);
+      setChars(text.length);
+      set({ cv: text });
+    } catch (e: any) {
+      setExtractError(e?.message || "Couldn't read that file. Try pasting the text instead.");
+    } finally {
+      setReading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
 
   async function go() {
     if (!d) return;
@@ -93,6 +135,10 @@ function AboutPage() {
         {d.round === "Other" && <Input className="mt-3" placeholder="Describe the round" value={d.roundOther} onChange={(e) => set({ roundOther: e.target.value })} />}
       </section>
       <section>
+        <h2 className="mb-3 font-semibold">When is your real interview? <span className="font-normal text-muted-foreground">(optional)</span></h2>
+        <Input type="date" className="max-w-xs" value={d.scheduledDate} onChange={(e) => set({ scheduledDate: e.target.value })} />
+      </section>
+      <section>
         <h2 className="mb-3 font-semibold">Who will interview you?</h2>
         <div className="flex flex-wrap gap-2">
           {INTERVIEWERS.map((r) => (
@@ -108,8 +154,17 @@ function AboutPage() {
       <section>
         <h2 className="mb-3 font-semibold">Your CV or background <span className="font-normal text-muted-foreground">(optional)</span></h2>
         <Textarea rows={5} placeholder="Paste your CV or a short summary of your experience. Feedback will only ever use facts you provide." value={d.cv} onChange={(e) => set({ cv: e.target.value })} />
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.txt,.md,.rtf" className="hidden" onChange={(e) => readCv(e.target.files?.[0])} aria-label="Upload your CV" />
+          <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={reading}>
+            {reading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+            {reading ? "Reading your CV..." : "Upload CV"}
+          </Button>
+          {fileName && <span className="text-sm text-muted-foreground">{fileName} · {chars.toLocaleString()} characters read</span>}
+          {fileName && <button type="button" className="text-sm text-muted-foreground underline" onClick={() => { setFileName(""); setChars(0); set({ cv: "" }); }}>Clear</button>}
+        </div>
       </section>
-      {error && <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+      {(error || extractError) && <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error || extractError}</p>}
       <div className="flex justify-between">
         <Button variant="ghost" onClick={() => nav({ to: "/prepare" })}>Back</Button>
         <Button size="lg" onClick={go} disabled={!d.interviewers.length}>Build My Interview</Button>

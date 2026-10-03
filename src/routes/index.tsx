@@ -32,17 +32,27 @@ function matches(j: Job, f: (typeof FILTERS)[number]) {
 function Home() {
   const [jobs, setJobs] = useState<Job[] | null>(null);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
-  useEffect(() => setJobs(loadJobs()), []);
+  useEffect(() => {
+    const refresh = () => setJobs(loadJobs());
+    refresh();
+    const t = setInterval(refresh, 3000);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("storage", refresh);
+    return () => { clearInterval(t); window.removeEventListener("focus", refresh); window.removeEventListener("storage", refresh); };
+  }, []);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
       <section className="rounded-3xl bg-surface p-10 text-surface-foreground sm:p-14">
         <h1 className="font-display max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
         <p className="mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
-        <Button asChild size="lg" className="mt-8"><Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button asChild size="lg"><Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          <Button asChild size="lg" variant="secondary"><Link to="/" hash="interviews">See my interview tracker</Link></Button>
+        </div>
       </section>
 
-      <section className="mt-14">
+      <section id="interviews" className="mt-14 scroll-mt-24">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
           <div className="flex flex-wrap gap-2">
@@ -76,6 +86,7 @@ function Home() {
                     <div><p className="text-muted-foreground">Previous</p><p className="font-medium">{prev ? `${prev.score}/100` : "—"}</p></div>
                   </div>
                   {round && <div><div className="flex justify-between text-sm"><span>Preparation</span><span>{progressFor(round)}%</span></div><Progress className="mt-2" value={progressFor(round)} /></div>}
+                  {round?.scheduledDate && <p className="text-xs text-muted-foreground">Real interview on {new Date(round.scheduledDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</p>}
                   <p className="text-xs text-muted-foreground">Last practice {latest ? new Date(latest.date).toLocaleDateString() : "—"}</p>
                   <Button asChild className="w-full"><Link to="/jobs/$id" params={{ id: j.id }}>Continue Preparation</Link></Button>
                 </CardContent>
