@@ -48,6 +48,7 @@ function JdPage() {
   const [extractError, setExtractError] = useState<string | null>(null);
 
   const [sliding, setSliding] = useState(false);
+  const [hideStep1, setHideStep1] = useState(false);
   useEffect(() => {
     const dr = loadDraft();
     if (!dr.jobId) setJd(dr.jd);
@@ -76,17 +77,19 @@ function JdPage() {
     setJd("");
   }
 
-  const [hideStep1, setHideStep1] = useState(false);
 
   function next() {
     const draft = { ...newDraft(), jd, unlocked: true };
     saveDraft(draft);
     setD(draft);
     setUnlocked(true);
+    // Unlock scrolling only for the programmatic slide; manual scroll stays locked until step 1 is gone.
+    setSliding(true);
     requestAnimationFrame(() => step2Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     // After the slide, drop step 1 from the page so it can't be scrolled back to.
     setTimeout(() => {
       setHideStep1(true);
+      setSliding(false);
       requestAnimationFrame(() => window.scrollTo({ top: 0 }));
     }, 800);
   }
@@ -94,7 +97,8 @@ function JdPage() {
   function back() {
     setUnlocked(false);
     setHideStep1(false);
-    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    setSliding(false);
+    requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   }
 
   async function readCv(file?: File) {
