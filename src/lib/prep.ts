@@ -71,6 +71,15 @@ export function updateJob(id: string, fn: (j: Job) => Job) {
 export const roundName = (d: Pick<Draft, "round" | "roundOther">) => (d.round === "Other" ? d.roundOther || "Other" : d.round);
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
+/** Interviewer personas — name gender matches the ElevenLabs voice. */
+export interface Persona { name: string; voiceId: string; gender: "male" | "female" }
+export const PERSONAS: Persona[] = [
+  { name: "James Whitfield", voiceId: "JBFqnCBsd6RMkjVDRZzb", gender: "male" },   // George
+  { name: "Sarah Bennett", voiceId: "EXAVITQu4vr4xnSDxMaL", gender: "female" },    // Sarah
+  { name: "Arthur Hale", voiceId: "CwhRBWXzGAHq8TQ4Fs17", gender: "male" },        // Roger
+  { name: "Emily Carson", voiceId: "9BWtsMINqrJLrRacOk9x", gender: "female" },     // Aria
+];
+
 /** Signatures of questions already asked for this job — used to avoid repetition on retry. */
 export function previousSignatures(jobId?: string): string[] {
   const j = jobId ? getJob(jobId) : undefined;

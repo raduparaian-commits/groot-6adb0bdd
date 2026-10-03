@@ -37,11 +37,26 @@ async function getAgentId(): Promise<string> {
         conversation: { max_duration_seconds: 3900 },
       },
       platform_settings: {
-        overrides: { conversation_config_override: { agent: { prompt: { prompt: true }, first_message: true } } },
+        overrides: { conversation_config_override: { agent: { prompt: { prompt: true }, first_message: true }, tts: { voice_id: true } } },
       },
     }),
   });
   return (cachedAgentId = created.agent_id as string);
+}
+
+let patched = false;
+/** Ensure an existing agent allows per-session voice overrides. */
+async function ensureVoiceOverride(agentId: string) {
+  if (patched) return;
+  patched = true;
+  await el(`/agents/${agentId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      platform_settings: {
+        overrides: { conversation_config_override: { agent: { prompt: { prompt: true }, first_message: true }, tts: { voice_id: true } } },
+      },
+    }),
+  }).catch(() => {});
 }
 
 const Input = z.object({
@@ -49,6 +64,7 @@ const Input = z.object({
   interviewers: z.array(z.string().max(60)).max(10), additional: z.string().max(4000), cv: z.string().max(20000),
   title: z.string().max(200), company: z.string().max(200),
   interviewer: z.object({ name: z.string().max(100), role: z.string().max(200) }),
+  personaName: z.string().max(100).optional(),
   plan: z.array(z.any()).max(20),
 });
 
