@@ -23,7 +23,7 @@ export interface PrepInfo {
   areas: { name: string; why: string }[]; scenarios: string[]; questionStyles: string[];
   interviewer: { name: string; role: string };
 }
-export interface Turn { speaker: "interviewer" | "candidate"; text: string; followUp?: boolean }
+export interface Turn { speaker: "interviewer" | "candidate"; text: string; followUp?: boolean | undefined }
 export interface Results {
   overallScore: number;
   categories: { roleRelevance: number; evidence: number; structure: number; technical: number; communication: number; effectiveness: number };
@@ -33,11 +33,11 @@ export interface Results {
   nextAction: string;
 }
 export interface Draft {
-  jobId?: string; roundId?: string;
+  jobId?: string | undefined; roundId?: string | undefined;
   jd: string; duration: number; round: string; roundOther: string;
   interviewers: string[]; additional: string; cv: string;
-  analysis?: JdAnalysis; prep?: PrepInfo; plan?: PlanItem[];
-  transcript?: Turn[]; durationSec?: number; results?: Results;
+  analysis?: JdAnalysis | undefined; prep?: PrepInfo | undefined; plan?: PlanItem[] | undefined;
+  transcript?: Turn[] | undefined; durationSec?: number | undefined; results?: Results | undefined;
 }
 export interface Attempt { id: string; date: string; score: number; results: Results; signatures: string[] }
 export interface Round {
