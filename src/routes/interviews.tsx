@@ -1,237 +1,236 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Mic, MicOff, GraduationCap, Briefcase, Sparkles } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { APP_STORAGE_KEY, getPreset, type Preset, type SubmittedApplication } from "@/lib/presets";
+import { generateQuestions, getFeedback, type Feedback } from "@/lib/interview.functions";
 
 export const Route = createFileRoute("/interviews")({
   head: () => ({
     meta: [
-      { title: "Mock Interviews — Groot" },
-      { name: "description", content: "Practice spoken interviews tailored to your target university or job." },
-      { property: "og:title", content: "Mock Interviews — Groot" },
-      { property: "og:description", content: "Practice spoken interviews tailored to your target university or job." },
+      { title: "Mock Interview — Groot" },
+      { name: "description", content: "An interview built from your own application, with scores and ideal answers for every question." },
+      { property: "og:title", content: "Mock Interview — Groot" },
+      { property: "og:description", content: "An interview built from your own application, with scores and ideal answers for every question." },
     ],
   }),
-  component: InterviewsPage,
+  component: InterviewPage,
 });
 
-type Mode = "university" | "job";
+function buildPayload(app: SubmittedApplication, preset: Preset) {
+  const application = [
+    `Name: ${app.name || "Candidate"}`,
+    `${preset.roleLabel}: ${app.role}`,
+    ...preset.questions.map((q) => `${q.label}\n${app.answers[q.id] || "(blank)"}`),
+  ].join("\n\n");
+  return { target: preset.name, kind: preset.kind, role: app.role, values: preset.values, application };
+}
 
-const DEMO_QUESTIONS: Record<Mode, string[]> = {
-  university: [
-    "Why have you chosen this particular course at this university?",
-    "Tell me about a book, project, or idea that shaped how you think.",
-    "What would you contribute to the community here?",
-    "Describe a challenge you faced and how you handled it.",
-  ],
-  job: [
-    "Walk me through your experience with this kind of work.",
-    "Tell me about a time you disagreed with your team — what happened?",
-    "Why this company, and why now?",
-    "Describe a project you led from start to finish.",
-  ],
-};
+function speak(text: string) {
+  if (typeof window === "undefined" || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
 
-function InterviewsPage() {
-  const [mode, setMode] = useState<Mode>("university");
-  const [target, setTarget] = useState("");
-  const [started, setStarted] = useState(false);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [answer, setAnswer] = useState("");
+function InterviewPage() {
+  const [app, setApp] = useState<SubmittedApplication | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [questions, setQuestions] = useState<string[] | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
-  const [micOn, setMicOn] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [scoring, setScoring] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recRef = useRef<any>(null);
+  const genQ = useServerFn(generateQuestions);
+  const genF = useServerFn(getFeedback);
 
-  const questions = DEMO_QUESTIONS[mode];
-  const question = questions[questionIndex] ?? questions[0]!;
-  const isLast = questionIndex === questions.length - 1;
+  useEffect(() => {
+    const raw = sessionStorage.getItem(APP_STORAGE_KEY);
+    if (raw) setApp(JSON.parse(raw));
+    setLoaded(true);
+  }, []);
 
-  function start() {
-    setStarted(true);
-    setQuestionIndex(0);
-    setAnswers([]);
-    setAnswer("");
+  const preset = app ? getPreset(app.presetId) : undefined;
+
+  useEffect(() => {
+    if (!app || !preset || questions) return;
+    genQ({ data: buildPayload(app, preset) })
+      .then((r) => {
+        setQuestions(r.questions);
+        setAnswers(r.questions.map(() => ""));
+      })
+      .catch((e) => setError(e.message));
+  }, [app, preset]);
+
+  useEffect(() => {
+    if (questions?.[idx] && !feedback) speak(questions[idx]!);
+  }, [questions, idx]);
+
+  function toggleMic() {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return setError("Voice answers aren't supported in this browser — type instead.");
+    if (listening) { recRef.current?.stop(); return; }
+    const rec = new SR();
+    rec.continuous = true;
+    rec.interimResults = false;
+    const start = answers[idx] ?? "";
+    let said = "";
+    rec.onresult = (e: any) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) said += e.results[i][0].transcript + " ";
+      setAnswers((a) => a.map((v, i) => (i === idx ? (start + " " + said).trim() : v)));
+    };
+    rec.onend = () => setListening(false);
+    recRef.current = rec;
+    rec.start();
+    setListening(true);
   }
 
-  function submitAnswer() {
-    const next = [...answers, answer];
-    setAnswers(next);
-    setAnswer("");
-    if (isLast) {
-      setStarted(false);
-    } else {
-      setQuestionIndex((i) => i + 1);
+  async function finish() {
+    if (!app || !preset || !questions) return;
+    recRef.current?.stop();
+    window.speechSynthesis?.cancel();
+    setScoring(true);
+    try {
+      const r = await genF({ data: { ...buildPayload(app, preset), transcript: questions.map((q, i) => ({ q, a: answers[i] ?? "" })) } });
+      setFeedback(r);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setScoring(false);
     }
   }
 
+  if (!loaded) return null;
+
+  if (!app || !preset) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-24 text-center">
+        <h1 className="font-display text-3xl font-semibold">Start with your application</h1>
+        <p className="mt-3 text-muted-foreground">Your interview is built from what you write in your application.</p>
+        <Button asChild size="lg" className="mt-8"><Link to="/applications">Start practicing</Link></Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <Badge variant="outline" className="mb-4 border-primary/40 text-primary">
-        <Mic className="mr-1 h-3.5 w-3.5" />
-        Mock interview
-      </Badge>
-      <h1 className="font-display text-4xl font-semibold tracking-tight">
-        Practice the interview before the interview
-      </h1>
-      <p className="mt-3 max-w-xl text-muted-foreground">
-        Choose your target and work through questions shaped around it.
-      </p>
+    <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
+      <Badge variant="outline" className="mb-4 border-primary/40 text-primary">Step 2 of 2 · Interview</Badge>
+      <h1 className="font-display text-4xl font-semibold tracking-tight">{preset.name} interview</h1>
+      <p className="mt-2 text-muted-foreground">{app.role}</p>
 
-      {!started && answers.length === 0 && (
-        <Card className="mt-10">
-          <CardHeader>
-            <CardTitle className="font-display text-xl">Set up your session</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label className="mb-3 block text-sm font-medium">What are you interviewing for?</Label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => setMode("university")}
-                  className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
-                    mode === "university"
-                      ? "border-primary bg-secondary/60"
-                      : "border-border hover:bg-muted/50"
-                  }`}
-                >
-                  <GraduationCap className="h-5 w-5 text-primary" />
-                  <span>
-                    <span className="block text-sm font-semibold">University</span>
-                    <span className="block text-xs text-muted-foreground">Admissions interview</span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("job")}
-                  className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
-                    mode === "job"
-                      ? "border-primary bg-secondary/60"
-                      : "border-border hover:bg-muted/50"
-                  }`}
-                >
-                  <Briefcase className="h-5 w-5 text-primary" />
-                  <span>
-                    <span className="block text-sm font-semibold">Job</span>
-                    <span className="block text-xs text-muted-foreground">Role interview</span>
-                  </span>
-                </button>
-              </div>
-            </div>
+      {error && <p className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
 
-            <div className="space-y-2">
-              <Label htmlFor="target" className="text-sm font-medium">
-                {mode === "university" ? "University / course" : "Company / role"}
-              </Label>
-              <Input
-                id="target"
-                placeholder={
-                  mode === "university"
-                    ? "e.g. Oxford, Medicine — or paste a course link"
-                    : "e.g. Graduate Software Engineer at Monzo — or paste a job ad"
-                }
-                value={target}
-                onChange={(e) => setTarget(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                The more specific you are, the more tailored the practice.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-4">
-              <div className="flex items-center gap-3">
-                {micOn ? (
-                  <Mic className="h-5 w-5 text-primary" />
-                ) : (
-                  <MicOff className="h-5 w-5 text-muted-foreground" />
-                )}
-                <div>
-                  <p className="text-sm font-semibold">Voice practice</p>
-                  <p className="text-xs text-muted-foreground">
-                    Speak your answers — AI voice coming soon
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setMicOn((v) => !v)}
-                aria-pressed={micOn}
-              >
-                {micOn ? "On" : "Off"}
-              </Button>
-            </div>
-
-            <Button onClick={start} size="lg" className="w-full sm:w-auto">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Start interview
-            </Button>
-          </CardContent>
-        </Card>
+      {!questions && !error && (
+        <div className="mt-12 flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Reading your application and preparing questions…
+        </div>
       )}
 
-      {started && (
-        <Card className="mt-10">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="font-display text-lg">
-              Question {questionIndex + 1} of {questions.length}
-            </CardTitle>
-            {target && (
-              <Badge variant="secondary" className="max-w-[50%] truncate">
-                {target}
-              </Badge>
-            )}
+      {questions && !feedback && (
+        <Card className="mt-8">
+          <CardHeader>
+            <div className="mb-3 flex items-center justify-between text-sm text-muted-foreground">
+              <span>Question {idx + 1} of {questions.length}</span>
+              <button onClick={() => speak(questions[idx]!)} className="inline-flex items-center gap-1 hover:text-foreground">
+                <Volume2 className="h-4 w-4" /> Replay
+              </button>
+            </div>
+            <Progress value={((idx + 1) / questions.length) * 100} />
+            <CardTitle className="font-display pt-4 text-2xl leading-snug">{questions[idx]}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="font-display text-xl leading-relaxed">{question}</p>
             <Textarea
-              placeholder="Type your answer — or use voice mode once it's live"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={6}
+              rows={7}
+              placeholder="Speak with the mic or type your answer…"
+              value={answers[idx] ?? ""}
+              onChange={(e) => setAnswers((a) => a.map((v, i) => (i === idx ? e.target.value : v)))}
             />
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setStarted(false)}>
-                End session
+            <div className="flex flex-wrap gap-3">
+              <Button variant={listening ? "destructive" : "outline"} onClick={toggleMic}>
+                {listening ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
+                {listening ? "Stop" : "Answer by voice"}
               </Button>
-              <Button onClick={submitAnswer} disabled={answer.trim().length === 0}>
-                {isLast ? "Finish" : "Next question"}
-              </Button>
+              <div className="ml-auto flex gap-3">
+                <Button variant="ghost" disabled={idx === 0} onClick={() => { recRef.current?.stop(); setIdx(idx - 1); }}>Back</Button>
+                {idx < questions.length - 1 ? (
+                  <Button onClick={() => { recRef.current?.stop(); setIdx(idx + 1); }}>Next question</Button>
+                ) : (
+                  <Button onClick={finish} disabled={scoring}>
+                    {scoring && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Finish & get scores
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {!started && answers.length > 0 && (
-        <Card className="mt-10">
-          <CardHeader>
-            <CardTitle className="font-display text-xl">Session complete</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              You answered {answers.length} questions{target ? ` for ${target}` : ""}.
-              Feedback and scoring are coming soon.
-            </p>
-            <div className="space-y-3">
-              {questions.map((q, i) => (
-                <div key={q} className="rounded-lg border border-border p-4">
-                  <p className="text-sm font-semibold">{q}</p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-                    {answers[i] || "—"}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <Button onClick={() => { setAnswers([]); setQuestionIndex(0); }}>
-              New session
-            </Button>
-          </CardContent>
-        </Card>
+      {feedback && questions && (
+        <div className="mt-8 space-y-6">
+          <Card className="border-primary/40 bg-secondary/40">
+            <CardContent className="flex items-start gap-6 p-6">
+              <ScoreBadge score={feedback.overallScore} large />
+              <div>
+                <p className="font-display text-xl font-semibold">Overall</p>
+                <p className="mt-1 text-muted-foreground">{feedback.overall}</p>
+              </div>
+            </CardContent>
+          </Card>
+          {questions.map((q, i) => {
+            const f = feedback.perQuestion[i];
+            if (!f) return null;
+            return (
+              <Card key={i}>
+                <CardHeader className="flex-row items-start gap-4 space-y-0">
+                  <ScoreBadge score={f.score} />
+                  <CardTitle className="font-display text-lg leading-snug">Q{i + 1}. {q}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">What could improve</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                      {f.improvements.map((m, j) => <li key={j}>{m}</li>)}
+                    </ul>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border border-border bg-muted/40 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your answer</p>
+                      <p className="mt-2 whitespace-pre-wrap text-sm">{answers[i] || "(no answer)"}</p>
+                    </div>
+                    <div className="rounded-xl border border-primary/40 bg-secondary/40 p-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Revised ideal answer</p>
+                        <button onClick={() => speak(f.ideal)} className="text-muted-foreground hover:text-foreground" aria-label="Listen">
+                          <Volume2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <p className="mt-2 whitespace-pre-wrap text-sm">{f.ideal}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+          <Button asChild size="lg"><Link to="/applications">Practice again</Link></Button>
+        </div>
       )}
     </div>
+  );
+}
+
+function ScoreBadge({ score, large }: { score: number; large?: boolean }) {
+  const tone = score >= 8 ? "bg-primary text-primary-foreground" : score >= 5 ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground";
+  return (
+    <span className={`flex shrink-0 flex-col items-center justify-center rounded-xl font-display font-semibold ${tone} ${large ? "h-20 w-20 text-3xl" : "h-12 w-12 text-lg"}`}>
+      {score}
+      <span className="text-[10px] font-normal opacity-80">/10</span>
+    </span>
   );
 }
