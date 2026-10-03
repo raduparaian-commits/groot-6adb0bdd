@@ -47,14 +47,14 @@ function Home() {
         <h1 className="font-display max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
         <p className="mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Button asChild size="lg"><Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-          <Button asChild size="lg" variant="secondary"><Link to="/" hash="interviews">See my interview tracker</Link></Button>
+          <Button asChild size="lg"><Link to="/jobs/new">Add a job <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          <Button asChild size="lg" variant="secondary"><Link to="/" hash="interviews">See my jobs</Link></Button>
         </div>
       </section>
 
       <section id="interviews" className="mt-14 scroll-mt-24">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
+          <h2 className="font-display text-3xl font-semibold">Your jobs</h2>
           <div className="flex flex-wrap gap-2">
             {FILTERS.map((f) => (
               <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-3 py-1 text-sm ${filter === f ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>{f}</button>
@@ -62,9 +62,10 @@ function Home() {
           </div>
         </div>
         {jobs && jobs.length === 0 && (
-          <p className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
-            No interviews yet. Complete your first mock interview and it will appear here automatically.
-          </p>
+          <div className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
+            <p>No jobs yet. Add the job or university place you're applying for, then start interviews from inside it.</p>
+            <Button asChild className="mt-4"><Link to="/jobs/new">Add your first job</Link></Button>
+          </div>
         )}
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           {jobs?.filter((j) => matches(j, filter)).map((j) => {
@@ -80,15 +81,15 @@ function Home() {
                     <p className="text-sm text-muted-foreground">{j.company}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div><p className="text-muted-foreground">Current round</p><p className="font-medium">{round?.name}</p></div>
+                    <div><p className="text-muted-foreground">Current round</p><p className="font-medium">{round?.name ?? "Not started"}</p></div>
                     <div><p className="text-muted-foreground">Real status</p><p className="font-medium">{statusOf(j)}</p></div>
                     <div><p className="text-muted-foreground">Latest mock score</p><p className="font-medium">{latest ? `${latest.score}/100` : "—"}</p></div>
-                    <div><p className="text-muted-foreground">Previous</p><p className="font-medium">{prev ? `${prev.score}/100` : "—"}</p></div>
+                    <div><p className="text-muted-foreground">Interviews done</p><p className="font-medium">{j.rounds.reduce((n, r) => n + r.attempts.length, 0)}{prev ? ` · prev ${prev.score}` : ""}</p></div>
                   </div>
                   {round && <div><div className="flex justify-between text-sm"><span>Preparation</span><span>{progressFor(round)}%</span></div><Progress className="mt-2" value={progressFor(round)} /></div>}
                   {round?.scheduledDate && <p className="text-xs text-muted-foreground">Real interview on {new Date(round.scheduledDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</p>}
                   <p className="text-xs text-muted-foreground">Last practice {latest ? new Date(latest.date).toLocaleDateString() : "—"}</p>
-                  <Button asChild className="w-full"><Link to="/jobs/$id" params={{ id: j.id }}>Continue Preparation</Link></Button>
+                  <Button asChild className="w-full"><Link to="/jobs/$id" params={{ id: j.id }}>Open job</Link></Button>
                 </CardContent>
               </Card>
             );
