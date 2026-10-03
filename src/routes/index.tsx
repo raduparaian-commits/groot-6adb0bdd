@@ -32,9 +32,9 @@ function Home() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-      <section className="relative overflow-hidden rounded-3xl bg-surface px-6 py-20 text-center text-surface-foreground sm:py-28">
-        {/* Neural pulse background */}
+    <div className="flex w-full flex-1 flex-col">
+      <section className="relative flex min-h-[520px] flex-1 flex-col items-center justify-center overflow-hidden bg-surface px-4 py-20 text-center text-surface-foreground sm:py-28">
+        {/* Neural pulse background — stretches edge-to-edge across the window */}
         <div aria-hidden className="absolute inset-0 pointer-events-none">
           <div
             className="absolute inset-0 opacity-[0.04]"
@@ -68,8 +68,9 @@ function Home() {
         </div>
       </section>
 
-      <section id="interviews" className="mt-14 scroll-mt-24">
-        <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
+      <section id="interviews" className="scroll-mt-24">
+        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+          <h2 className="font-display text-3xl font-semibold">Your interviews</h2>
         {jobs && jobs.length === 0 && (
           <p className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
             No interviews yet. Complete your first mock interview and it will appear here automatically.
@@ -102,6 +103,7 @@ function Home() {
               </Card>
             );
           })}
+        </div>
         </div>
       </section>
     </div>
