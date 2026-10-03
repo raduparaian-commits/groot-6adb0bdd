@@ -131,7 +131,7 @@ function LivePage() {
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
   const initials = d.prep.interviewer.name.split(" ").map((w) => w[0]).join("").slice(0, 2);
-  const label = { thinking: "Thinking...", speaking: "Speaking...", listening: "Listening...", scoring: "Preparing your feedback..." }[phase];
+  const label = { connecting: "Connecting...", thinking: "Thinking...", speaking: "Speaking...", listening: micOff ? "Mic muted" : "Listening...", error: "Connection error", ended: "Interview ended", scoring: "Preparing your feedback..." }[phase];
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-surface text-surface-foreground">
@@ -154,24 +154,25 @@ function LivePage() {
               style={{ height: phase === "speaking" || mic ? `${20 + ((i * 37) % 80)}%` : "15%", animationDelay: `${i * 60}ms` }} />
           ))}
         </div>
-        <p className="mt-3 flex items-center gap-2 text-sm">{(phase === "thinking" || phase === "scoring") && <Loader2 className="h-4 w-4 animate-spin" />}{label}</p>
+        <p className="mt-3 flex items-center gap-2 text-sm">{(phase === "thinking" || phase === "scoring" || phase === "connecting") && <Loader2 className="h-4 w-4 animate-spin" />}{label}</p>
 
         {muted && current && <p className="mt-6 rounded-xl bg-background/10 p-4 text-center">{current.text}</p>}
         {error && <p className="mt-4 rounded-lg bg-destructive/20 p-3 text-sm">{error}</p>}
 
-        {phase === "listening" && !closing && (
+        {phase === "error" && <Button className="mt-6" onClick={() => connect(d)}>Try connecting again</Button>}
+        {(phase === "listening" || phase === "thinking" || phase === "speaking") && (
           <div className="mt-8 w-full space-y-3">
-            <Textarea rows={4} className="bg-background text-foreground" placeholder="Answer with the mic or type..." value={answer} onChange={(e) => setAnswer(e.target.value)} />
+            <Textarea rows={4} className="bg-background text-foreground" placeholder="Just speak — or type an answer here..." value={answer} onChange={(e) => setAnswer(e.target.value)} />
             <div className="flex justify-center gap-3">
-              <Button variant={mic ? "destructive" : "secondary"} onClick={toggleMic}>{mic ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}{mic ? "Stop mic" : "Speak"}</Button>
-              <Button onClick={send} disabled={!answer.trim()}><Send className="mr-2 h-4 w-4" />Done answering</Button>
+              <Button variant={micOff ? "destructive" : "secondary"} onClick={toggleMic}>{micOff ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}{micOff ? "Unmute mic" : "Mute mic"}</Button>
+              <Button onClick={send} disabled={!answer.trim()}><Send className="mr-2 h-4 w-4" />Send typed answer</Button>
             </div>
           </div>
         )}
         {closing && phase !== "scoring" && <Button size="lg" className="mt-8" onClick={end}>See my results</Button>}
 
         <div className="mt-10 flex gap-3">
-          <Button variant="secondary" size="icon" onClick={() => { setMuted(!muted); window.speechSynthesis?.cancel(); }} aria-label="Mute">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</Button>
+          <Button variant="secondary" size="icon" onClick={() => { setMuted(!muted); }} aria-label="Mute">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</Button>
           <Button variant="secondary" size="icon" onClick={() => setShowT(!showT)} aria-label="Transcript"><ScrollText className="h-4 w-4" /></Button>
           <Button variant="destructive" onClick={end} disabled={phase === "scoring"}><PhoneOff className="mr-2 h-4 w-4" />End interview</Button>
         </div>
