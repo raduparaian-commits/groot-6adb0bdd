@@ -10,53 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApplicationsRouteImport } from './routes/applications'
-import { Route as InterviewsRouteImport } from './routes/interviews'
+import { Route as LiveRouteImport } from './routes/live'
+import { Route as ResultsRouteImport } from './routes/results'
+import { Route as JobsIdRouteImport } from './routes/jobs.$id'
+import { Route as PrepareIndexRouteImport } from './routes/prepare.index'
+import { Route as PrepareAboutRouteImport } from './routes/prepare.about'
+import { Route as PrepareRoomRouteImport } from './routes/prepare.room'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApplicationsRoute = ApplicationsRouteImport.update({
-  id: '/applications',
-  path: '/applications',
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InterviewsRoute = InterviewsRouteImport.update({
-  id: '/interviews',
-  path: '/interviews',
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsIdRoute = JobsIdRouteImport.update({
+  id: '/jobs/$id',
+  path: '/jobs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrepareIndexRoute = PrepareIndexRouteImport.update({
+  id: '/prepare/',
+  path: '/prepare/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrepareAboutRoute = PrepareAboutRouteImport.update({
+  id: '/prepare/about',
+  path: '/prepare/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrepareRoomRoute = PrepareRoomRouteImport.update({
+  id: '/prepare/room',
+  path: '/prepare/room',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/applications': typeof ApplicationsRoute
-  '/interviews': typeof InterviewsRoute
+  '/live': typeof LiveRoute
+  '/results': typeof ResultsRoute
+  '/jobs/$id': typeof JobsIdRoute
+  '/prepare/about': typeof PrepareAboutRoute
+  '/prepare/room': typeof PrepareRoomRoute
+  '/prepare/': typeof PrepareIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/applications': typeof ApplicationsRoute
-  '/interviews': typeof InterviewsRoute
+  '/live': typeof LiveRoute
+  '/results': typeof ResultsRoute
+  '/jobs/$id': typeof JobsIdRoute
+  '/prepare/about': typeof PrepareAboutRoute
+  '/prepare/room': typeof PrepareRoomRoute
+  '/prepare': typeof PrepareIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/applications': typeof ApplicationsRoute
-  '/interviews': typeof InterviewsRoute
+  '/live': typeof LiveRoute
+  '/results': typeof ResultsRoute
+  '/jobs/$id': typeof JobsIdRoute
+  '/prepare/about': typeof PrepareAboutRoute
+  '/prepare/room': typeof PrepareRoomRoute
+  '/prepare/': typeof PrepareIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/applications' | '/interviews'
+  fullPaths:
+    | '/'
+    | '/live'
+    | '/results'
+    | '/jobs/$id'
+    | '/prepare/about'
+    | '/prepare/room'
+    | '/prepare/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/applications' | '/interviews'
-  id: '__root__' | '/' | '/applications' | '/interviews'
+  to:
+    | '/'
+    | '/live'
+    | '/results'
+    | '/jobs/$id'
+    | '/prepare/about'
+    | '/prepare/room'
+    | '/prepare'
+  id:
+    | '__root__'
+    | '/'
+    | '/live'
+    | '/results'
+    | '/jobs/$id'
+    | '/prepare/about'
+    | '/prepare/room'
+    | '/prepare/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApplicationsRoute: typeof ApplicationsRoute
-  InterviewsRoute: typeof InterviewsRoute
+  LiveRoute: typeof LiveRoute
+  ResultsRoute: typeof ResultsRoute
+  JobsIdRoute: typeof JobsIdRoute
+  PrepareAboutRoute: typeof PrepareAboutRoute
+  PrepareRoomRoute: typeof PrepareRoomRoute
+  PrepareIndexRoute: typeof PrepareIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,18 +130,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/applications': {
-      id: '/applications'
-      path: '/applications'
-      fullPath: '/applications'
-      preLoaderRoute: typeof ApplicationsRouteImport
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/interviews': {
-      id: '/interviews'
-      path: '/interviews'
-      fullPath: '/interviews'
-      preLoaderRoute: typeof InterviewsRouteImport
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs/$id': {
+      id: '/jobs/$id'
+      path: '/jobs/$id'
+      fullPath: '/jobs/$id'
+      preLoaderRoute: typeof JobsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prepare/': {
+      id: '/prepare/'
+      path: '/prepare'
+      fullPath: '/prepare/'
+      preLoaderRoute: typeof PrepareIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prepare/about': {
+      id: '/prepare/about'
+      path: '/prepare/about'
+      fullPath: '/prepare/about'
+      preLoaderRoute: typeof PrepareAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prepare/room': {
+      id: '/prepare/room'
+      path: '/prepare/room'
+      fullPath: '/prepare/room'
+      preLoaderRoute: typeof PrepareRoomRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -87,8 +177,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApplicationsRoute: ApplicationsRoute,
-  InterviewsRoute: InterviewsRoute,
+  LiveRoute: LiveRoute,
+  ResultsRoute: ResultsRoute,
+  JobsIdRoute: JobsIdRoute,
+  PrepareAboutRoute: PrepareAboutRoute,
+  PrepareRoomRoute: PrepareRoomRoute,
+  PrepareIndexRoute: PrepareIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
