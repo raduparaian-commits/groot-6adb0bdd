@@ -59,12 +59,25 @@ function JdPage() {
     setJd("");
   }
 
+  const [hideStep1, setHideStep1] = useState(false);
+
   function next() {
     const draft = { ...newDraft(), jd };
     saveDraft(draft);
     setD(draft);
     setUnlocked(true);
     requestAnimationFrame(() => step2Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    // After the slide, drop step 1 from the page so it can't be scrolled back to.
+    setTimeout(() => {
+      setHideStep1(true);
+      requestAnimationFrame(() => window.scrollTo({ top: 0 }));
+    }, 800);
+  }
+
+  function back() {
+    setUnlocked(false);
+    setHideStep1(false);
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   }
 
   async function readCv(file?: File) {
@@ -132,6 +145,8 @@ function JdPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-14 sm:px-6">
+      {!hideStep1 && (
+      <div className="flex min-h-[calc(100vh-10rem)] flex-col">
       <Badge variant="outline" className="mb-4 self-start border-primary/40 text-primary">
         Step 1 of 3
       </Badge>
@@ -144,8 +159,11 @@ function JdPage() {
           <Button size="lg" onClick={next} disabled={!ok}>Next</Button>
         </div>
       </div>
+      </div>
+      )}
 
-      <div ref={step2Ref} className={`mt-24 scroll-mt-24 space-y-10 transition-opacity duration-500 ${unlocked ? "" : "pointer-events-none select-none opacity-40"}`} aria-hidden={!unlocked}>
+      {unlocked && (
+      <div ref={step2Ref} className={`scroll-mt-24 space-y-10 ${hideStep1 ? "" : "mt-24"}`}>
         <div>
           <Badge variant="outline" className="mb-4 border-primary/40 text-primary">Step 2 of 3</Badge>
           <h1 className="font-display text-4xl font-semibold tracking-tight">About your interview</h1>
