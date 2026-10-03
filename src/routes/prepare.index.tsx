@@ -152,7 +152,7 @@ function JdPage() {
       <Badge variant="outline" className="mb-4 self-start border-primary/40 text-primary">
         Step 1 of 3
       </Badge>
-      <div className="mt-24">
+      <div className="mt-10">
         <h1 className="font-display text-4xl font-semibold tracking-tight">Tell us about the job</h1>
         <p className="mt-2 text-muted-foreground">Paste the full job description. Your interview adapts to every responsibility and skill in it.</p>
         <Textarea className="mt-8 min-h-[180px] max-h-[70vh] resize-none overflow-y-auto [field-sizing:content]" placeholder="Paste the complete job description here..." value={jd} onChange={(e) => setJd(e.target.value)} />
