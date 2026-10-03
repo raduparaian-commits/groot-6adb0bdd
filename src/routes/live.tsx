@@ -169,7 +169,7 @@ function LivePage() {
             </div>
           </div>
         )}
-        {<Button size="lg" className="mt-8" onClick={end}>See my results</Button>}
+        {closing && <Button size="lg" className="mt-8" onClick={end}>See my results</Button>}
 
         <div className="mt-10 flex gap-3">
           <Button variant="secondary" size="icon" onClick={() => { setMuted(!muted); }} aria-label="Mute">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</Button>
