@@ -37,7 +37,7 @@ function Index() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
-              <Link to="/interviews">
+              <Link to="/applications">
                 Start a mock interview
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -78,7 +78,7 @@ function Index() {
                 Practice spoken answers and get feedback on what to sharpen.
               </p>
               <Button asChild variant="ghost" className="mt-6 -ml-4 px-4">
-                <Link to="/interviews">
+                <Link to="/applications">
                   Try an interview <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
@@ -148,7 +148,7 @@ function Index() {
             Pick a university or a job and Groot does the rest.
           </p>
           <Button asChild size="lg" variant="secondary" className="mt-8">
-            <Link to="/interviews">
+            <Link to="/applications">
               Start now <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

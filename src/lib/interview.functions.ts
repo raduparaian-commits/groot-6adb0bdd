@@ -10,7 +10,7 @@ const AppSchema = z.object({
 });
 
 async function ai(messages: { role: string; content: string }[]) {
-  const key = process.env.LOVABLE_API_KEY;
+  const key = process.env['LOVABLE_API_KEY'];
   if (!key) throw new Error("AI is not configured");
   const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
     method: "POST",
