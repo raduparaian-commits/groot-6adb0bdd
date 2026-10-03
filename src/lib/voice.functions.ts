@@ -72,9 +72,11 @@ export const startVoiceInterview = createServerFn({ method: "POST" })
   .inputValidator((d) => Input.parse(d))
   .handler(async ({ data }) => {
     const agentId = await getAgentId();
+    await ensureVoiceOverride(agentId);
     const { token } = await el(`/conversation/token?agent_id=${agentId}`);
+    const name = data.personaName || data.interviewer.name;
     const company = data.company && data.company !== "Unknown" ? data.company : "the organisation";
-    const prompt = `You are ${data.interviewer.name}, ${data.interviewer.role} at ${company}, conducting a live spoken "${data.round}" interview for the position of ${data.title}. Interview length: about ${data.duration} minutes. Interviewer type: ${data.interviewers.join(", ") || "not specified"}.
+    const prompt = `You are ${name}, ${data.interviewer.role} at ${company}, conducting a live spoken "${data.round}" interview for the position of ${data.title}. Interview length: about ${data.duration} minutes. Interviewer type: ${data.interviewers.join(", ") || "not specified"}.
 
 HOW TO BEHAVE
 - Act exactly like a real, professional human interviewer. Speak naturally, concisely, one question at a time (1-3 sentences per turn).
