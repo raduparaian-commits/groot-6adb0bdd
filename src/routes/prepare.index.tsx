@@ -12,9 +12,9 @@ import { buildInterview } from "@/lib/prep.functions";
 export const Route = createFileRoute("/prepare/")({
   head: () => ({
     meta: [
-      { title: "Tell us about the job — Groot" },
+      { title: "Tell us about the job" },
       { name: "description", content: "Paste a job description and Groot builds a realistic interview around it." },
-      { property: "og:title", content: "Tell us about the job — Groot" },
+      { property: "og:title", content: "Tell us about the job" },
       { property: "og:description", content: "Paste a job description and Groot builds a realistic interview around it." },
     ],
   }),
@@ -106,7 +106,7 @@ function JdPage() {
         text = await file.text();
       }
       text = text.replace(/[ \t]+\n/g, "\n").trim();
-      if (!text) throw new Error("No readable text found in that file — try pasting it below instead.");
+      if (!text) throw new Error("No readable text in that file. Try pasting it instead.");
       setFileName(file.name);
       setChars(text.length);
       set({ cv: text });
@@ -130,7 +130,7 @@ function JdPage() {
       nav({ to: "/prepare/room" });
     } catch (e: any) {
       const raw = e?.message ?? "";
-      setError(/^\s*[[{]/.test(raw) ? "Something went wrong building your interview — please try again." : raw || "Something went wrong. Please try again.");
+      setError(/^\s*[[{]/.test(raw) ? "Something went wrong. Please try again." : raw || "Something went wrong. Please try again.");
       setStep(-1);
     } finally {
       clearInterval(t);

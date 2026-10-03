@@ -12,7 +12,7 @@ export async function ai(system: string, user: string): Promise<string> {
     }),
   });
   if (!res.ok || !res.body) {
-    if (res.status === 429) throw new Error("Too many requests — please wait a moment and try again.");
+    if (res.status === 429) throw new Error("Too many requests. Please wait a moment and try again.");
     if (res.status === 402) throw new Error("AI credits have run out.");
     throw new Error(`AI request failed [${res.status}]: ${await res.text()}`);
   }

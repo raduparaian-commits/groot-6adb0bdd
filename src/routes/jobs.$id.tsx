@@ -8,9 +8,9 @@ import { REAL_STATUSES, getJob, newDraft, progressFor, saveDraft, updateJob, typ
 export const Route = createFileRoute("/jobs/$id")({
   head: () => ({
     meta: [
-      { title: "Interview tracker — Groot" },
+      { title: "Interview tracker" },
       { name: "description", content: "Every round, attempt and score for one job, tracked automatically." },
-      { property: "og:title", content: "Interview tracker — Groot" },
+      { property: "og:title", content: "Interview tracker" },
       { property: "og:description", content: "Every round, attempt and score for one job, tracked automatically." },
     ],
   }),
@@ -46,7 +46,7 @@ function JobPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-14 sm:px-6">
       <div>
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← My interviews</Link>
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← Home</Link>
         <h1 className="font-display mt-3 text-4xl font-semibold tracking-tight">{job.title}</h1>
         <p className="text-muted-foreground">{job.company} · {job.analysis.seniority}</p>
         <p className="mt-3 max-w-3xl text-sm">{job.analysis.summary}</p>

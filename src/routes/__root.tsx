@@ -128,9 +128,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Groot — Practice that adapts to you" },
-      { name: "description", content: "Mock interviews and mock applications that adapt to every university and job." },
-      { property: "og:title", content: "Groot — Practice that adapts to you" },
+      { title: "Groot: practice that adapts to you" },
+      { name: "description", content: "Mock interviews that adapt to every university and job." },
+      { property: "og:title", content: "Groot: practice that adapts to you" },
       { property: "og:description", content: "Mock interviews and mock applications that adapt to every university and job." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

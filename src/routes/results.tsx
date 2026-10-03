@@ -9,9 +9,9 @@ import { loadDraft, recordAttempt, roundName, saveDraft, type Draft } from "@/li
 export const Route = createFileRoute("/results")({
   head: () => ({
     meta: [
-      { title: "Post interview feedback — Groot" },
+      { title: "Post interview feedback" },
       { name: "description", content: "Your score, what went well, what to improve and honest question-by-question feedback." },
-      { property: "og:title", content: "Post interview feedback — Groot" },
+      { property: "og:title", content: "Post interview feedback" },
       { property: "og:description", content: "Your score, what went well, what to improve and honest question-by-question feedback." },
     ],
   }),
@@ -84,7 +84,7 @@ function ResultsPage() {
     const next = { ...d!, jobId, results: { ...d!.results!, saved: true } };
     saveDraft(next);
     setD(next);
-    toast.success("Interview saved — it now shows on your home page.");
+    toast.success("Saved. It now shows on your home page.");
   }
 
   function retry() {
@@ -118,8 +118,8 @@ function ResultsPage() {
           <div className="space-y-2 text-sm">
             <h2 className="font-display text-xl font-semibold">How much of what you said had mistakes</h2>
             <p className="text-muted-foreground">Based on {total} words you spoke across {qs.length} questions.</p>
-            <p className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-destructive" />Mistakes — {pct}%</p>
-            <p className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-primary" />Fine — {100 - pct}%</p>
+            <p className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-destructive" />Mistakes: {pct}%</p>
+            <p className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-primary" />Fine: {100 - pct}%</p>
           </div>
         </CardContent>
       </Card>
@@ -169,7 +169,7 @@ function ResultsPage() {
                 <p className="text-xs font-semibold uppercase text-destructive">Mistakes made</p>
                 {q.mistakes?.length ? (
                   <ul className="mt-2 space-y-2">{q.mistakes.map((m, k) => (
-                    <li key={k}><span className="font-medium text-destructive">"{m.quote}"</span> — {m.issue}</li>
+                    <li key={k}><span className="font-medium text-destructive">"{m.quote}"</span>: {m.issue}</li>
                   ))}</ul>
                 ) : <p className="mt-2 text-muted-foreground">No clear mistakes in this answer.</p>}
               </div>
