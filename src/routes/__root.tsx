@@ -26,9 +26,9 @@ function Header() {
           <span className="font-display text-xl font-semibold tracking-tight">Groot</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Link to="/" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">My jobs</Link>
+          <Link to="/" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">My interviews</Link>
           <Button asChild size="lg">
-            <Link to="/jobs/new">Add a job</Link>
+            <Link to="/prepare">Prepare for an Interview</Link>
           </Button>
         </div>
       </div>
@@ -51,10 +51,10 @@ function Footer() {
         </p>
         <nav className="flex gap-4 text-sm">
           <Link to="/" className="text-surface-foreground/80 hover:text-surface-foreground">
-            My jobs
+            My interviews
           </Link>
-          <Link to="/jobs/new" className="text-surface-foreground/80 hover:text-surface-foreground">
-            Add a job
+          <Link to="/prepare" className="text-surface-foreground/80 hover:text-surface-foreground">
+            Prepare
           </Link>
         </nav>
       </div>

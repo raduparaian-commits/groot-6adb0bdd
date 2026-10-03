@@ -71,17 +71,6 @@ export function updateJob(id: string, fn: (j: Job) => Job) {
 export const roundName = (d: Pick<Draft, "round" | "roundOther">) => (d.round === "Other" ? d.roundOther || "Other" : d.round);
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
-/** Add a job the user wants to prepare for. Interviews are then started from inside it. */
-export function createJob(p: { title: string; company: string; jd: string; cv: string }): string {
-  const now = new Date().toISOString();
-  const job: Job = {
-    id: uid(), title: p.title, company: p.company, jd: p.jd, cv: p.cv, createdAt: now, updatedAt: now, rounds: [],
-    analysis: { title: p.title, company: p.company, seniority: "", skills: [], competencies: [], themes: [], summary: "" },
-  };
-  saveJobs([job, ...loadJobs()]);
-  return job.id;
-}
-
 /** Signatures of questions already asked for this job — used to avoid repetition on retry. */
 export function previousSignatures(jobId?: string): string[] {
   const j = jobId ? getJob(jobId) : undefined;
@@ -97,8 +86,6 @@ export function recordAttempt(d: Draft): string {
   if (!job) {
     job = { id: uid(), title: d.analysis.title, company: d.analysis.company, jd: d.jd, analysis: d.analysis, cv: d.cv, createdAt: now, updatedAt: now, rounds: [] };
     jobs.unshift(job);
-  } else if (!job.analysis.skills.length) {
-    job.analysis = d.analysis; // first interview fills in the AI's read of a manually added job
   }
   const name = roundName(d);
   let round = job.rounds.find((r) => r.id === d.roundId) ?? job.rounds.find((r) => r.name === name);

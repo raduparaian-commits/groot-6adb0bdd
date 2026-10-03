@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as JobsIdRouteImport } from './routes/jobs.$id'
-import { Route as JobsNewRouteImport } from './routes/jobs.new'
 import { Route as PrepareIndexRouteImport } from './routes/prepare.index'
 import { Route as PrepareAboutRouteImport } from './routes/prepare.about'
 import { Route as PrepareRoomRouteImport } from './routes/prepare.room'
@@ -38,11 +37,6 @@ const JobsIdRoute = JobsIdRouteImport.update({
   path: '/jobs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsNewRoute = JobsNewRouteImport.update({
-  id: '/jobs/new',
-  path: '/jobs/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrepareIndexRoute = PrepareIndexRouteImport.update({
   id: '/prepare/',
   path: '/prepare/',
@@ -64,7 +58,6 @@ export interface FileRoutesByFullPath {
   '/live': typeof LiveRoute
   '/results': typeof ResultsRoute
   '/jobs/$id': typeof JobsIdRoute
-  '/jobs/new': typeof JobsNewRoute
   '/prepare/about': typeof PrepareAboutRoute
   '/prepare/room': typeof PrepareRoomRoute
   '/prepare/': typeof PrepareIndexRoute
@@ -74,7 +67,6 @@ export interface FileRoutesByTo {
   '/live': typeof LiveRoute
   '/results': typeof ResultsRoute
   '/jobs/$id': typeof JobsIdRoute
-  '/jobs/new': typeof JobsNewRoute
   '/prepare/about': typeof PrepareAboutRoute
   '/prepare/room': typeof PrepareRoomRoute
   '/prepare': typeof PrepareIndexRoute
@@ -85,7 +77,6 @@ export interface FileRoutesById {
   '/live': typeof LiveRoute
   '/results': typeof ResultsRoute
   '/jobs/$id': typeof JobsIdRoute
-  '/jobs/new': typeof JobsNewRoute
   '/prepare/about': typeof PrepareAboutRoute
   '/prepare/room': typeof PrepareRoomRoute
   '/prepare/': typeof PrepareIndexRoute
@@ -97,7 +88,6 @@ export interface FileRouteTypes {
     | '/live'
     | '/results'
     | '/jobs/$id'
-    | '/jobs/new'
     | '/prepare/about'
     | '/prepare/room'
     | '/prepare/'
@@ -107,7 +97,6 @@ export interface FileRouteTypes {
     | '/live'
     | '/results'
     | '/jobs/$id'
-    | '/jobs/new'
     | '/prepare/about'
     | '/prepare/room'
     | '/prepare'
@@ -117,7 +106,6 @@ export interface FileRouteTypes {
     | '/live'
     | '/results'
     | '/jobs/$id'
-    | '/jobs/new'
     | '/prepare/about'
     | '/prepare/room'
     | '/prepare/'
@@ -128,7 +116,6 @@ export interface RootRouteChildren {
   LiveRoute: typeof LiveRoute
   ResultsRoute: typeof ResultsRoute
   JobsIdRoute: typeof JobsIdRoute
-  JobsNewRoute: typeof JobsNewRoute
   PrepareAboutRoute: typeof PrepareAboutRoute
   PrepareRoomRoute: typeof PrepareRoomRoute
   PrepareIndexRoute: typeof PrepareIndexRoute
@@ -164,13 +151,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs/new': {
-      id: '/jobs/new'
-      path: '/jobs/new'
-      fullPath: '/jobs/new'
-      preLoaderRoute: typeof JobsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/prepare/': {
       id: '/prepare/'
       path: '/prepare'
@@ -200,7 +180,6 @@ const rootRouteChildren: RootRouteChildren = {
   LiveRoute: LiveRoute,
   ResultsRoute: ResultsRoute,
   JobsIdRoute: JobsIdRoute,
-  JobsNewRoute: JobsNewRoute,
   PrepareAboutRoute: PrepareAboutRoute,
   PrepareRoomRoute: PrepareRoomRoute,
   PrepareIndexRoute: PrepareIndexRoute,

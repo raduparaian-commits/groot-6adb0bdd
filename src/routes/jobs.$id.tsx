@@ -43,58 +43,14 @@ function JobPage() {
     nav({ to: "/" });
   }
 
-  const all = job.rounds.flatMap((r) => r.attempts).sort((a, b) => a.date.localeCompare(b.date));
-  const scores = all.map((a) => a.score);
-  const stats = [
-    ["Interviews done", String(all.length)],
-    ["Best score", scores.length ? `${Math.max(...scores)}/100` : "—"],
-    ["Average", scores.length ? `${Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)}/100` : "—"],
-    ["Latest", scores.length ? `${scores.at(-1)}/100${scores.length > 1 ? ` (${scores.at(-1)! - scores.at(-2)! >= 0 ? "+" : ""}${scores.at(-1)! - scores.at(-2)!})` : ""}` : "—"],
-  ];
-
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-14 sm:px-6">
       <div>
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← My jobs</Link>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-4xl font-semibold tracking-tight">{job.title}</h1>
-            <p className="text-muted-foreground">{job.company}{job.analysis.seniority ? ` · ${job.analysis.seniority}` : ""}</p>
-          </div>
-          <Button size="lg" onClick={() => practice(job.rounds.at(-1))}>Start an interview</Button>
-        </div>
-        {job.analysis.summary && <p className="mt-3 max-w-3xl text-sm">{job.analysis.summary}</p>}
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← My interviews</Link>
+        <h1 className="font-display mt-3 text-4xl font-semibold tracking-tight">{job.title}</h1>
+        <p className="text-muted-foreground">{job.company} · {job.analysis.seniority}</p>
+        <p className="mt-3 max-w-3xl text-sm">{job.analysis.summary}</p>
       </div>
-
-      <div className="grid gap-3 sm:grid-cols-4">
-        {stats.map(([k, v]) => (
-          <div key={k} className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">{k}</p>
-            <p className="font-display mt-1 text-2xl font-semibold">{v}</p>
-          </div>
-        ))}
-      </div>
-
-      {scores.length > 1 && (
-        <Card><CardHeader><CardTitle className="text-base">Score progress</CardTitle></CardHeader>
-          <CardContent>
-            <div className="flex h-32 items-end gap-2">
-              {all.map((a) => (
-                <div key={a.id} className="flex flex-1 flex-col items-center gap-1">
-                  <span className="text-xs">{a.score}</span>
-                  <div className="w-full rounded-t-md bg-primary" style={{ height: `${Math.max(4, a.score)}%` }} />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {!job.rounds.length && (
-        <p className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
-          No interviews for this job yet. Press "Start an interview" — every interview you do here is saved to this job.
-        </p>
-      )}
 
       {job.rounds.map((r) => {
         const sorted = [...r.attempts].reverse();

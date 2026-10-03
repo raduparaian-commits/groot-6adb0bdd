@@ -60,10 +60,8 @@ function JdPage() {
   }
 
   const [hideStep1, setHideStep1] = useState(false);
-  const [jdMissing, setJdMissing] = useState(false);
 
   function next() {
-    if (!ok) { setJdMissing(true); return; }
     const draft = { ...newDraft(), jd };
     saveDraft(draft);
     setD(draft);
@@ -155,11 +153,10 @@ function JdPage() {
       <div className="flex flex-1 flex-col justify-center">
         <h1 className="font-display text-4xl font-semibold tracking-tight">Tell us about the job</h1>
         <p className="mt-2 text-muted-foreground">Paste the full job description. Your interview adapts to every responsibility and skill in it.</p>
-        <Textarea aria-invalid={jdMissing} className={`mt-8 ${jdMissing ? "border-destructive ring-2 ring-destructive/30" : ""} min-h-[180px] max-h-[70vh] resize-none overflow-y-auto [field-sizing:content]`} placeholder="Paste the complete job description here..." value={jd} onChange={(e) => { setJd(e.target.value); if (e.target.value.trim()) setJdMissing(false); }} />
-        {jdMissing && <p className="mt-2 text-sm text-destructive">You must fill in this field.</p>}
+        <Textarea className="mt-8 min-h-[180px] max-h-[70vh] resize-none overflow-y-auto [field-sizing:content]" placeholder="Paste the complete job description here..." value={jd} onChange={(e) => setJd(e.target.value)} />
         <div className="mt-6 flex justify-between">
           <Button variant="ghost" onClick={remove} disabled={!jd}>Remove</Button>
-          <Button size="lg" onClick={next}>Next</Button>
+          <Button size="lg" onClick={next} disabled={!ok}>Next</Button>
         </div>
       </div>
       </div>
