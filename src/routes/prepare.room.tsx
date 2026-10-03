@@ -75,7 +75,7 @@ function RoomPage() {
         <div className="grid gap-3 sm:grid-cols-4">
           {STAR.map(([k, v]) => (
             <div key={k} className="rounded-xl border border-primary/30 bg-secondary/40 p-4">
-              <p className="font-semibold"><span className="mr-2 font-display text-2xl font-semibold text-primary">{k![0]}</span>{k}</p>
+              <p className="flex items-center gap-2 font-semibold"><span className="font-display text-2xl font-semibold leading-none text-primary">{k![0]}</span>{k}</p>
               <p className="text-sm text-muted-foreground">{v}</p>
             </div>
           ))}
