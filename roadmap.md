@@ -5,7 +5,7 @@
 - [x] Results: 6 categories, JD coverage, placeholder-based improved answers
 - [x] Tracker detail: rounds, attempts, real status, retry, next round
 - [x] ElevenLabs voice interviewer connected (server-issued session token)
-- [ ] Landing page: tracker quick-access button + live-updating interview cards
-- [ ] About step: real interview date field, shown in the tracker
-- [ ] About step: CV file upload with automatic text extraction
+- [x] Landing page: tracker quick-access button + live-updating interview cards
+- [x] About step: real interview date field, shown in the tracker
+- [x] About step: CV file upload with automatic text extraction
 - [ ] Accounts + saved data in Lovable Cloud (tracker currently saved in this browser)
