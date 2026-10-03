@@ -50,6 +50,7 @@ function JdPage() {
   useEffect(() => {
     const dr = loadDraft();
     if (!dr.jobId) setJd(dr.jd);
+    if (dr.unlocked) setUnlocked(true);
   }, []);
   const ok = jd.trim().length > 0;
   const set = (p: Partial<Draft>) => setD((prev) => (prev ? { ...prev, ...p } : prev));
@@ -62,7 +63,7 @@ function JdPage() {
   const [hideStep1, setHideStep1] = useState(false);
 
   function next() {
-    const draft = { ...newDraft(), jd };
+    const draft = { ...newDraft(), jd, unlocked: true };
     saveDraft(draft);
     setD(draft);
     setUnlocked(true);
