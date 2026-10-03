@@ -11,9 +11,9 @@ import { startVoiceInterview } from "@/lib/voice.functions";
 export const Route = createFileRoute("/live")({
   head: () => ({
     meta: [
-      { title: "Live interview — Groot" },
+      { title: "Live interview" },
       { name: "description", content: "A live, adaptive AI interview that listens and follows up like a real interviewer." },
-      { property: "og:title", content: "Live interview — Groot" },
+      { property: "og:title", content: "Live interview" },
       { property: "og:description", content: "A live, adaptive AI interview that listens and follows up like a real interviewer." },
     ],
   }),
@@ -162,7 +162,7 @@ function LivePage() {
         {phase === "error" && <Button className="mt-6" onClick={() => connect(d)}>Try connecting again</Button>}
         {(phase === "listening" || phase === "thinking" || phase === "speaking") && (
           <div className="mt-8 w-full space-y-3">
-            <Textarea rows={4} className="bg-background text-foreground" placeholder="Just speak — or type an answer here..." value={answer} onChange={(e) => setAnswer(e.target.value)} />
+            <Textarea rows={4} className="bg-background text-foreground" placeholder="Speak your answer, or type it here..." value={answer} onChange={(e) => setAnswer(e.target.value)} />
             <div className="flex justify-center gap-3">
               <Button variant={micOff ? "destructive" : "secondary"} onClick={toggleMic}>{micOff ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}{micOff ? "Unmute mic" : "Mute mic"}</Button>
               <Button onClick={send} disabled={!answer.trim()}><Send className="mr-2 h-4 w-4" />Send typed answer</Button>

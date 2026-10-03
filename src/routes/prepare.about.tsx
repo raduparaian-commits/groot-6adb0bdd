@@ -12,9 +12,9 @@ import { buildInterview } from "@/lib/prep.functions";
 export const Route = createFileRoute("/prepare/about")({
   head: () => ({
     meta: [
-      { title: "About your interview — Groot" },
+      { title: "About your interview" },
       { name: "description", content: "Choose the round, length and interviewer so your practice matches the real thing." },
-      { property: "og:title", content: "About your interview — Groot" },
+      { property: "og:title", content: "About your interview" },
       { property: "og:description", content: "Choose the round, length and interviewer so your practice matches the real thing." },
     ],
   }),
@@ -77,7 +77,7 @@ function AboutPage() {
         text = await file.text();
       }
       text = text.replace(/[ \t]+\n/g, "\n").trim();
-      if (!text) throw new Error("No readable text found in that file — try pasting it below instead.");
+      if (!text) throw new Error("No readable text in that file. Try pasting it instead.");
       setFileName(file.name);
       setChars(text.length);
       set({ cv: text });

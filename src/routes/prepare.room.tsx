@@ -8,9 +8,9 @@ import { loadDraft, roundName, type Draft } from "@/lib/prep";
 export const Route = createFileRoute("/prepare/room")({
   head: () => ({
     meta: [
-      { title: "Preparation room — Groot" },
+      { title: "Preparation room" },
       { name: "description", content: "See what you're likely to be tested on and prepare your STAR examples before going live." },
-      { property: "og:title", content: "Preparation room — Groot" },
+      { property: "og:title", content: "Preparation room" },
       { property: "og:description", content: "See what you're likely to be tested on and prepare your STAR examples before going live." },
     ],
   }),
@@ -85,7 +85,7 @@ function RoomPage() {
 
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-8 text-center">
         <p>You'll be interviewed by <strong>{d.prep.interviewer.name}</strong>, {d.prep.interviewer.role}.</p>
-        <p className="text-sm text-muted-foreground">The exact questions stay hidden — just like the real thing. Find a quiet spot and allow microphone access.</p>
+        <p className="text-sm text-muted-foreground">Questions stay hidden until you start. Find a quiet spot and allow microphone access.</p>
         <Button asChild size="lg" className="mt-2"><Link to="/live">Start interview</Link></Button>
       </div>
     </div>

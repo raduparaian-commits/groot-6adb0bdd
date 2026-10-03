@@ -9,10 +9,10 @@ import { loadJobs, progressFor, type Job } from "@/lib/prep";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Groot — AI interview practice & automatic tracker" },
-      { name: "description", content: "Paste a job description, practise a live AI interview that adapts to you, and track every round automatically." },
-      { property: "og:title", content: "Groot — AI interview practice & automatic tracker" },
-      { property: "og:description", content: "Paste a job description, practise a live AI interview that adapts to you, and track every round automatically." },
+      { title: "Groot AI interview practice" },
+      { name: "description", content: "Paste a job description, practise a live AI interview, and track your progress." },
+      { property: "og:title", content: "Groot AI interview practice" },
+      { property: "og:description", content: "Paste a job description, practise a live AI interview, and track your progress." },
     ],
   }),
   component: Home,
@@ -59,7 +59,7 @@ function Home() {
             <span className="text-xs font-medium uppercase tracking-widest text-primary">AI Interview Coach</span>
           </div>
           <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Walk into every interview already practised.</h1>
-          <p className="mx-auto mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
+          <p className="mx-auto mt-4 max-w-xl text-surface-foreground/75">Paste a job description and practise a live AI interview that adapts to you.</p>
           <div className="mt-10 flex justify-center">
             <Button asChild size="lg" className="h-12 px-8 text-base" style={{ boxShadow: "0 0 32px color-mix(in oklab, var(--primary) 35%, transparent)" }}>
               <Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -92,12 +92,12 @@ function Home() {
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div><p className="text-muted-foreground">Current round</p><p className="font-medium">{round?.name}</p></div>
                     <div><p className="text-muted-foreground">Real status</p><p className="font-medium">{statusOf(j)}</p></div>
-                    <div><p className="text-muted-foreground">Latest mock score</p><p className="font-medium">{latest ? `${latest.score}/100` : "—"}</p></div>
-                    <div><p className="text-muted-foreground">Previous</p><p className="font-medium">{prev ? `${prev.score}/100` : "—"}</p></div>
+                    <div><p className="text-muted-foreground">Last score</p><p className="font-medium">{latest ? `${latest.score}/100` : "Not yet"}</p></div>
+                    <div><p className="text-muted-foreground">Previous</p><p className="font-medium">{prev ? `${prev.score}/100` : "Not yet"}</p></div>
                   </div>
                   {round && <div><div className="flex justify-between text-sm"><span>Preparation</span><span>{progressFor(round)}%</span></div><Progress className="mt-2" value={progressFor(round)} /></div>}
                   {round?.scheduledDate && <p className="text-xs text-muted-foreground">Real interview on {new Date(round.scheduledDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</p>}
-                  <p className="text-xs text-muted-foreground">Last practice {latest ? new Date(latest.date).toLocaleDateString() : "—"}</p>
+                  <p className="text-xs text-muted-foreground">Last practice {latest ? new Date(latest.date).toLocaleDateString() : "not yet"}</p>
                   <Button asChild className="w-full"><Link to="/jobs/$id" params={{ id: j.id }}>Continue Preparation</Link></Button>
                 </CardContent>
               </Card>
