@@ -64,6 +64,7 @@ function JobPage() {
               </select>
             </CardHeader>
             <CardContent className="space-y-4">
+              {r.scheduledDate && <p className="text-sm text-muted-foreground">Real interview on {new Date(r.scheduledDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</p>}
               <div>
                 <div className="flex justify-between text-sm"><span>Preparation progress</span><span>{progressFor(r)}%</span></div>
                 <Progress className="mt-2" value={progressFor(r)} />
