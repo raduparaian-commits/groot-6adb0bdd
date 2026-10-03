@@ -48,7 +48,6 @@ function Home() {
         <p className="mt-4 max-w-xl text-surface-foreground/75">Paste a job description. A live AI interviewer adapts to the role, the round and your answers — then gives honest feedback that never invents your experience.</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild size="lg"><Link to="/prepare">Prepare for an Interview <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-          <Button asChild size="lg" variant="secondary"><Link to="/" hash="interviews">See my interview tracker</Link></Button>
         </div>
       </section>
 

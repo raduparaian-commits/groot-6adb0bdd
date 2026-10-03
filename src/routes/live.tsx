@@ -5,7 +5,7 @@ import { Loader2, Mic, MicOff, PhoneOff, ScrollText, Send, Volume2, VolumeX } fr
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { loadDraft, recordAttempt, roundName, saveDraft, type Draft, type Turn } from "@/lib/prep";
+import { loadDraft, roundName, saveDraft, type Draft, type Turn } from "@/lib/prep";
 import { scoreInterview } from "@/lib/prep.functions";
 import { startVoiceInterview } from "@/lib/voice.functions";
 export const Route = createFileRoute("/live")({
@@ -112,9 +112,7 @@ function LivePage() {
         title: d.analysis!.title, company: d.analysis!.company, interviewer: { ...d.prep!.interviewer, name: d.prep!.interviewer.name }, plan: d.plan!,
         transcript: final.slice(-80), elapsedSec: elapsed,
       } });
-      const done: Draft = { ...d, transcript: final, durationSec: elapsed, results };
-      const jobId = recordAttempt(done);
-      saveDraft({ ...done, jobId });
+      saveDraft({ ...d, transcript: final, durationSec: elapsed, results });
       nav({ to: "/results" });
     } catch (e: any) {
       setError(e.message);
