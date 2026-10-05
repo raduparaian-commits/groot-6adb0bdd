@@ -24,7 +24,7 @@ function toText(v: unknown): string {
   if (Array.isArray(v)) return v.map(toText).join(", ");
   if (typeof v === "object") {
     const o = v as Record<string, unknown>;
-    const head = toText(o.name ?? o.title ?? "");
+    const head = toText(o["name"] ?? o["title"] ?? "");
     const rest = Object.entries(o).filter(([k]) => k !== "name" && k !== "title").map(([, x]) => toText(x)).filter(Boolean).join(". ");
     return head && rest ? `${head}: ${rest}` : head || rest;
   }
