@@ -17,6 +17,20 @@ export const Route = createFileRoute("/prepare/room")({
   component: RoomPage,
 });
 
+/** AI output sometimes returns objects (e.g. {name, situation, likely_focus}) instead of strings. */
+function toText(v: unknown): string {
+  if (v == null) return "";
+  if (typeof v === "string" || typeof v === "number") return String(v);
+  if (Array.isArray(v)) return v.map(toText).join(", ");
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    const head = toText(o["name"] ?? o["title"] ?? "");
+    const rest = Object.entries(o).filter(([k]) => k !== "name" && k !== "title").map(([, x]) => toText(x)).filter(Boolean).join(". ");
+    return head && rest ? `${head}: ${rest}` : head || rest;
+  }
+  return String(v);
+}
+
 const STAR = [
   ["Situation", "What was happening?"],
   ["Task", "What were you responsible for?"],
@@ -57,17 +71,17 @@ function RoomPage() {
       <section>
         <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary">What you're likely to be tested on</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {d.prep.areas.map((a) => (
-            <Card key={a.name}><CardContent className="p-5"><p className="font-semibold">{a.name}</p><p className="mt-1 text-sm text-muted-foreground">{a.why}</p></CardContent></Card>
+          {(d.prep.areas ?? []).map((a, i) => (
+            <Card key={i}><CardContent className="p-5"><p className="font-semibold">{toText(a.name)}</p><p className="mt-1 text-sm text-muted-foreground">{toText(a.why)}</p></CardContent></Card>
           ))}
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card><CardHeader><CardTitle className="text-base">Likely scenarios</CardTitle></CardHeader>
-          <CardContent><ul className="list-disc space-y-1 pl-5 text-sm">{d.prep.scenarios.map((s) => <li key={s}>{s}</li>)}</ul></CardContent></Card>
+          <CardContent><ul className="list-disc space-y-1 pl-5 text-sm">{(d.prep.scenarios ?? []).map((s, i) => <li key={i}>{toText(s)}</li>)}</ul></CardContent></Card>
         <Card><CardHeader><CardTitle className="text-base">Question styles to expect</CardTitle></CardHeader>
-          <CardContent><ul className="list-disc space-y-1 pl-5 text-sm">{d.prep.questionStyles.map((s) => <li key={s}>{s}</li>)}</ul></CardContent></Card>
+          <CardContent><ul className="list-disc space-y-1 pl-5 text-sm">{(d.prep.questionStyles ?? []).map((s, i) => <li key={i}>{toText(s)}</li>)}</ul></CardContent></Card>
       </div>
 
       <section>
